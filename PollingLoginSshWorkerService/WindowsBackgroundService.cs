@@ -56,6 +56,7 @@ public sealed class WindowsBackgroundService : BackgroundService
 
     private void CloseConnection()
     {
+        if (_sshClient == null) return;
         if (_sshClient!.IsConnected) _sshClient.Disconnect();
         _sshClient!.Dispose();
         _sshClient = null;
