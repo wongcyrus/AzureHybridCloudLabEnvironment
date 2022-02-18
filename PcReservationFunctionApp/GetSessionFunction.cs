@@ -5,6 +5,7 @@ using Microsoft.Azure.WebJobs;
 using Microsoft.Azure.WebJobs.Extensions.Http;
 using Microsoft.Extensions.Logging;
 using System.Threading.Tasks;
+using PcReservationFunctionApp.Model;
 
 namespace PcReservationFunctionApp
 {
@@ -29,7 +30,7 @@ namespace PcReservationFunctionApp
 
 
 
-            var session = new Session(ipAddress: "20.24.124.48", port: 22, username: "bastion", password: "q1Hf82IasE4TlsOkncT&");
+            var session = new Common.Model.Session(ipAddress: "20.24.124.48", port: 22, username: "bastion", password: "q1Hf82IasE4TlsOkncT&");
 
             return new OkObjectResult(session.ToJson());
         }

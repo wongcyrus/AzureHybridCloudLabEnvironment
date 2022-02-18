@@ -5,6 +5,7 @@ using Microsoft.Azure.WebJobs;
 using Microsoft.Azure.WebJobs.Extensions.Http;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Logging;
+using PcReservationFunctionApp.Model;
 
 namespace PcReservationFunctionApp
 {
@@ -19,7 +20,7 @@ namespace PcReservationFunctionApp
 
             string output = req.Query["output"];
 
-            var sshConnection =SshConnection.FromJson(output, log);
+            var sshConnection =SshProxy.FromJson(output, log);
 
             return new OkObjectResult(sshConnection);
         }
