@@ -24,21 +24,24 @@ var result = GetAsync("http://localhost:7071/api/GetReservationFunction");
 
 var session = JsonBase<Common.Model.Session>.FromJson(result, logger);
 
-var connectionInfo = new ConnectionInfo(session.IpAddress, 2222,
-    session.Username, new PasswordAuthenticationMethod(session.Username, session.Password));
-using var client = new SshClient(connectionInfo);
-client.Connect();
-
-Console.WriteLine(client.IsConnected);
-
-client.AddForwardedPort(new ForwardedPortRemote(3389, "localhost", 3389));
-foreach (var clientForwardedPort in client.ForwardedPorts)
+if (session != null)
 {
-    clientForwardedPort.Start();
-    Console.WriteLine(clientForwardedPort.IsStarted);
+    var connectionInfo = new ConnectionInfo(session.IpAddress, 2222,
+        session.Username, new PasswordAuthenticationMethod(session.Username, session.Password));
+    using var client = new SshClient(connectionInfo);
+    client.Connect();
+
+    Console.WriteLine(client.IsConnected);
+
+    client.AddForwardedPort(new ForwardedPortRemote(3389, "localhost", 3389));
+    foreach (var clientForwardedPort in client.ForwardedPorts)
+    {
+        clientForwardedPort.Start();
+        Console.WriteLine(clientForwardedPort.IsStarted);
+    }
+
+    Console.WriteLine("Enter any key to disconnect!");
+    Console.ReadLine();
+
+    client.Disconnect();
 }
-
-Console.WriteLine("Enter any key to disconnect!");
-Console.ReadLine();
-
-client.Disconnect();

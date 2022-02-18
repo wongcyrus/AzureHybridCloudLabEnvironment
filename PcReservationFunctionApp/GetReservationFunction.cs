@@ -33,7 +33,7 @@ namespace PcReservationFunctionApp
                 : $"Hello, {name}. This HTTP triggered function executed successfully.";
 
 
-            var session = new Session(ipAddress: "34.217.111.228", port: 2222, username: "bastion", password: "Abcd1234",
+            var session = new Session(ipAddress: "54.212.143.184", port: 2222, username: "bastion", password: "Abcd1234",
                 startTime: DateTime.UtcNow, endTime: DateTime.UtcNow.AddHours(1));
 
             return new OkObjectResult(session.ToJson());

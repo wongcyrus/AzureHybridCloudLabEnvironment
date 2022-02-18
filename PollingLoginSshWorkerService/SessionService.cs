@@ -25,7 +25,7 @@ public class SessionService
         return result;
     }
 
-    public async Task<Session?> GetSessionAsync()
+    public Session? GetSessionAsync()
     {
         try
         {
@@ -35,7 +35,7 @@ public class SessionService
             var session = JsonBase<Session>.FromJson(result, _logger);
             return session;
         }
-        catch (Exception ex)
+        catch (Exception)
         {
             _logger.LogError("Cannot access: " + SessionApiUrl);
             return null;
