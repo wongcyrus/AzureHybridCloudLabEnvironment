@@ -10,6 +10,7 @@ public sealed class WindowsBackgroundService : BackgroundService
     private readonly SessionService _sessionService;
     private Session? _session;
     private SshClient? _sshClient;
+    private string _lastErrorMessage ="";
 
     public WindowsBackgroundService(
         SessionService sessionService,
@@ -22,7 +23,8 @@ public sealed class WindowsBackgroundService : BackgroundService
     {
         while (!stoppingToken.IsCancellationRequested)
         {
-            var newSession = _sessionService.GetSessionAsync();
+            var newSession = _sessionService.GetSessionAsync(_sshClient != null, _lastErrorMessage);
+            _lastErrorMessage = "";
 
             _logger.LogInformation("newSession:" + newSession);
             _logger.LogInformation("_session:" + _session);
@@ -66,19 +68,21 @@ public sealed class WindowsBackgroundService : BackgroundService
             _logger.LogInformation("Cannot connect with null session!");
             return;
         }
-        var connectionInfo = new ConnectionInfo(_session.IpAddress, _session.Port,
-            _session.Username, new PasswordAuthenticationMethod(_session.Username, _session.Password));
-        _sshClient = new SshClient(connectionInfo);
-        _sshClient.ErrorOccurred += (s, args) => _logger.LogInformation("sshClient:" + args.Exception.Message);
 
         try
         {
+            var connectionInfo = new ConnectionInfo(_session.IpAddress, _session.Port,
+                _session.Username, new PasswordAuthenticationMethod(_session.Username, _session.Password));
+            _sshClient = new SshClient(connectionInfo);
+            _sshClient.ErrorOccurred += (s, args) => _logger.LogInformation("sshClient:" + args.Exception.Message);
             _sshClient.Connect();
         }
-        catch (SocketException)
+        catch (Exception ex)
         {
             CloseConnection();
             _logger.LogError("Cannot connect to " + _session);
+            _logger.LogError(ex.Message);
+            _lastErrorMessage = $"Connect Error {DateTime.Now.ToUniversalTime().ToString()}: {ex.Message}";
             return;
         }
 
@@ -104,6 +108,7 @@ public sealed class WindowsBackgroundService : BackgroundService
         catch (Exception ex)
         {
             _logger.LogError(ex.ToString());
+            _lastErrorMessage = $"CloseConnection Error {DateTime.Now.ToUniversalTime().ToString()}: {ex.Message}";
         }
         finally
         {

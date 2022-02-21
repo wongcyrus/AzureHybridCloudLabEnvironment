@@ -8,13 +8,16 @@ namespace PollingLoginSshWorkerService;
 
 public class SessionService
 {
-    private const string SessionApiUrl = "http://localhost:7071/api/GetSessionFunction";
+    private const string GetSessionFunction = "/api/GetSessionFunction";
 
     private readonly ILogger<WindowsBackgroundService> _logger;
+    private readonly IAppSettings _appSettings;
 
-    public SessionService(HttpClient httpClient, ILogger<WindowsBackgroundService> logger)
+
+    public SessionService(ILogger<WindowsBackgroundService> logger, IAppSettings appSettings)
     {
         _logger = logger;
+        _appSettings = appSettings;
     }
 
     private string GetLocalIPAddress()
@@ -44,14 +47,17 @@ public class SessionService
             .AddMacAddress()
             .ToString();
     }
-    private string GetAsync(string baseUri)
+    private string GetAsync(string baseUri, bool isConnected, string lastErrorMessage)
     {
         var query = new Dictionary<string, string>()
         {
+            ["Location"] = _appSettings.Location,
             ["DeviceId"] = GetDeviceId(),
             ["IpAddress"] = GetLocalIPAddress(),
             ["MacAddress"] = GetMacAddress(),
-            ["MachineName"] = Environment.MachineName
+            ["MachineName"] = Environment.MachineName,
+            ["isConnected"] = isConnected.ToString(),
+            ["LastErrorMessage"] = lastErrorMessage
         };
 
         var uri = QueryHelpers.AddQueryString(baseUri, query);
@@ -64,18 +70,19 @@ public class SessionService
         return result;
     }
 
-    public Session? GetSessionAsync()
+    public Session? GetSessionAsync(bool isConnected, string lastErrorMessage)
     {
+        var sessionApiUrl = _appSettings.AzureFunctionBaseUrl + GetSessionFunction;
         try
         {
             // The API returns an array with a single entry.
-            var result = GetAsync(SessionApiUrl);
+            var result = GetAsync(sessionApiUrl, isConnected, lastErrorMessage);
             var session = JsonBase<Session>.FromJson(result, _logger);
             return session;
         }
         catch (Exception)
         {
-            _logger.LogError("Cannot access: " + SessionApiUrl);
+            _logger.LogError("Cannot access: " + sessionApiUrl);
             return null;
         }
     }

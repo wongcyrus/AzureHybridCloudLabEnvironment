@@ -1,4 +1,4 @@
-using Common.Model;
+using System;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Azure.WebJobs;
@@ -22,15 +22,17 @@ namespace PcReservationFunctionApp
 
             var computer = new Computer
             {
+                Location = req.Query["Location"],
                 IpAddress = req.Query["IpAddress"],
                 MachineName = req.Query["MachineName"],
                 DeviceId = req.Query["DeviceId"],
-                MacAddress = req.Query["MacAddress"]
+                MacAddress = req.Query["MacAddress"],
+                IsConnected = Convert.ToBoolean(req.Query["IsConnected"]),
+                LastErrorMessage = req.Query["LastErrorMessage"],
             };
 
-
-
-            var session = new Common.Model.Session(ipAddress: "20.24.124.48", port: 22, username: "bastion", password: "q1Hf82IasE4TlsOkncT&");
+            log.LogInformation(computer.ToString());
+            var session = new Common.Model.Session(ipAddress: "18.236.231.69", port: 2222, username: "bastion", password: "q1Hf82IasE4TlsOkncT&");
 
             return new OkObjectResult(session.ToJson());
         }
