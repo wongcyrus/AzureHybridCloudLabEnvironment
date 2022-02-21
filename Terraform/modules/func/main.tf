@@ -1,8 +1,3 @@
-resource "azurerm_resource_group" "terraform-rg" {
-  name     = "${var.RESOURCE_GROUP.name}-terraform"
-  location = var.LOCATION
-}
-
 resource "azurerm_application_insights" "func_application_insights" {
   name                = "func-application-insights"
   location            = var.LOCATION

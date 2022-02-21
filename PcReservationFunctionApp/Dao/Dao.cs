@@ -43,7 +43,7 @@ internal abstract class Dao<T> where T : class, ITableEntity, new()
 
     public bool Update(T entity)
     {
-        var response = TableClient.UpdateEntity(entity, ETag.All, TableUpdateMode.Replace);
+        var response = TableClient.UpdateEntity(entity, ETag.All, TableUpdateMode.Merge);
         Logger.LogInformation("Updated " + entity);
         return !response.IsError;
     }
