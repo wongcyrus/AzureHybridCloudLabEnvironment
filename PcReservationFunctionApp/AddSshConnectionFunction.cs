@@ -1,4 +1,5 @@
 using System.Threading.Tasks;
+using Azure;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Azure.WebJobs;
 using Microsoft.Azure.WebJobs.Extensions.Http;
@@ -20,22 +21,34 @@ public static class AddSshConnectionFunction
     {
         log.LogInformation("AddSshProxyFunction HTTP trigger function processed a request.");
 
-        string status = req.Query["Status"];
-        string output = req.Query["Output"];
+        var status = req.Form["Status"];
+        var output = req.Form["Output"];
 
-        var sshConnection = SshConnection.FromJson(output, log);
+        log.LogInformation(output);
 
-        var config = new Config(context);
-        var connectionDao = new SshConnectionDao(config, log);
-
-        if (sshConnection != null)
+        if (status == "CREATED")
         {
+            log.LogInformation("CREATED");
+            var sshConnection = SshConnection.FromJson(output, log);
+
+            var config = new Config(context);
+            var connectionDao = new SshConnectionDao(config, log);
+
+            if (sshConnection == null) return new OkObjectResult("sshConnection null.");
             sshConnection.PartitionKey = sshConnection.Location;
             sshConnection.RowKey = sshConnection.Email;
+            sshConnection.ETag = ETag.All;
+            log.LogInformation(sshConnection.ToString());
             connectionDao.Upsert(sshConnection);
 
             return new OkObjectResult(sshConnection);
         }
-        return new OkObjectResult("sshConnection null.");
+        if(status == "DELETED")
+        {
+            log.LogInformation("DELETED");
+            return new OkObjectResult("DELETED");
+        }
+
+        return new OkObjectResult($"Status {status} no action.");
     }
 }

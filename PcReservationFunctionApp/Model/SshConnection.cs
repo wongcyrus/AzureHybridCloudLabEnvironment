@@ -9,7 +9,6 @@ namespace PcReservationFunctionApp.Model;
 [DataContract]
 public class SshConnection : JsonBase<SshConnection> , ITableEntity
 {
-
     [DataMember(Name = "EMAIL", EmitDefaultValue = false)] public string Email { get; set; }
     [DataMember(Name = "LAB", EmitDefaultValue = false)] public string Lab { get; set; }
     [DataMember(Name = "LOCATION", EmitDefaultValue = false)] public string Location { get; set; }
@@ -17,24 +16,14 @@ public class SshConnection : JsonBase<SshConnection> , ITableEntity
     [DataMember] public int Port { get; set; }
     [DataMember] public string Username { get; set; }
     [DataMember] public string Password { get; set; }
-
-    public override bool Equals(object obj)
-    {
-        return obj != null && ((obj as SshConnection)!).ToString().Equals(ToString());
-    }
-
-    public override int GetHashCode()
-    {
-        return (Email + Lab + IpAddress + Port + Username + Password).GetHashCode();
-    }
+    [DataMember] public string PartitionKey { get; set; }
+    [DataMember] public string RowKey { get; set; }
+    [DataMember] public DateTimeOffset? Timestamp { get; set; }
+    [DataMember] public ETag ETag { get; set; }
 
     public override string ToString()
     {
-        return $"{Email} {Lab} {IpAddress}:{Port} => {Username} : {Password}";
+        return $"{Email} {Lab} {Location} {IpAddress}:{Port} => {Username} : {Password}";
     }
 
-    [IgnoreDataMember] public string PartitionKey { get; set; }
-    [IgnoreDataMember] public string RowKey { get; set; }
-    [IgnoreDataMember] public DateTimeOffset? Timestamp { get; set; }
-    [IgnoreDataMember] public ETag ETag { get; set; }
 }
