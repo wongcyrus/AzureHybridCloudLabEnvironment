@@ -13,7 +13,7 @@ internal class SshConnectionDao : Dao<SshConnection>
     {
     }
 
-    public List<SshConnection> GetAllUnassignedForLab(string partitionKey)
+    public List<SshConnection> GetAllUnassignedByLab(string partitionKey)
     {
         var oDataQueryEntities =
             TableClient.Query<SshConnection>(e => e.PartitionKey == partitionKey && e.Status == "Unassigned");

@@ -1,4 +1,3 @@
-using System.Threading.Tasks;
 using Azure;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -14,7 +13,7 @@ namespace PcReservationFunctionApp;
 public static class AddSshConnectionFunction
 {
     [FunctionName(nameof(AddSshConnectionFunction))]
-    public static async Task<IActionResult> Run(
+    public static IActionResult Run(
         [HttpTrigger(AuthorizationLevel.Function, "post", Route = null)]
         HttpRequest req,
         ExecutionContext context,
@@ -36,20 +35,19 @@ public static class AddSshConnectionFunction
         sshConnection.Status = "Unassigned";
         sshConnection.ETag = ETag.All;
 
+        log.LogInformation(status);
         if (status == "CREATED")
         {
-            log.LogInformation("CREATED");
             sshConnectionDao.Upsert(sshConnection);
+            log.LogInformation("Done Upsert.");
             return new OkObjectResult(sshConnection);
         }
-
-        if (status == "DELETED")
+        if (status == "DELETED" || status == "DELETING")
         {
-            log.LogInformation("DELETED");
             sshConnectionDao.Delete(sshConnection);
+            log.LogInformation("Deleted.");
             return new OkObjectResult(sshConnection);
         }
-
         log.LogInformation(sshConnection.ToString());
         return new OkObjectResult($"Status {status} no action.");
     }

@@ -1,5 +1,4 @@
 using System;
-using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Azure.WebJobs;
@@ -16,7 +15,7 @@ public static class GetSessionFunction
 {
     [FunctionName(nameof(GetSessionFunction))]
     // ReSharper disable once UnusedMember.Global
-    public static async Task<IActionResult> Run(
+    public static IActionResult Run(
         [HttpTrigger(AuthorizationLevel.Anonymous, "get", Route = null)]
         HttpRequest req,
         ExecutionContext context,
@@ -57,7 +56,7 @@ public static class GetSessionFunction
         if (sessionDao.IsNew(connectedSession))
         {
             //Random get a unassigned SshConnection, change status to assigned (Optimistic concurrency) and save new Session.
-            var allUnassignedForLab = sshConnectionDao.GetAllUnassignedForLab(computer.Location);
+            var allUnassignedForLab = sshConnectionDao.GetAllUnassignedByLab(computer.Location);
 
             if (allUnassignedForLab.Count == 0)
             {
