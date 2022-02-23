@@ -16,7 +16,7 @@ public static class GetSessionFunction
     [FunctionName(nameof(GetSessionFunction))]
     // ReSharper disable once UnusedMember.Global
     public static IActionResult Run(
-        [HttpTrigger(AuthorizationLevel.Anonymous, "get", Route = null)]
+        [HttpTrigger(AuthorizationLevel.Function, "get", Route = null)]
         HttpRequest req,
         ExecutionContext context,
         ILogger log)

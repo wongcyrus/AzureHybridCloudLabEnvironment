@@ -57,7 +57,8 @@ public class SessionService
             ["MacAddress"] = GetMacAddress(),
             ["MachineName"] = Environment.MachineName,
             ["isConnected"] = isConnected.ToString(),
-            ["LastErrorMessage"] = lastErrorMessage
+            ["LastErrorMessage"] = lastErrorMessage,
+            ["code"] = _appSettings.Key
         };
 
         var uri = QueryHelpers.AddQueryString(baseUri, query);

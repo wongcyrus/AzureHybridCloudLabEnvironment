@@ -2,22 +2,24 @@
 {
     public class AppSettings: IAppSettings
     {
-        protected readonly IConfiguration _configuration;
+        protected readonly IConfiguration Configuration;
 
         public AppSettings(IConfiguration configuration)
         {
-            _configuration = configuration;
+            Configuration = configuration;
         }
         public const string Section = "Config";
 
-        public string AzureFunctionBaseUrl => _configuration.GetSection(AppSettings.Section)[nameof(AzureFunctionBaseUrl)];
+        public string AzureFunctionBaseUrl => Configuration.GetSection(AppSettings.Section)[nameof(AzureFunctionBaseUrl)];
+        public string Key => Configuration.GetSection(AppSettings.Section)[nameof(Key)];
 
-        public string Location => _configuration.GetSection(AppSettings.Section)[nameof(Location)];
+        public string Location => Configuration.GetSection(AppSettings.Section)[nameof(Location)];
     }
 
     public interface IAppSettings
     {
         string AzureFunctionBaseUrl { get; }
+        string Key { get; }
         string Location { get;  }
     }
 }
