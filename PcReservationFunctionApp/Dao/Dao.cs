@@ -2,8 +2,8 @@
 using System.Linq;
 using Azure;
 using Azure.Data.Tables;
-using PcReservationFunctionApp.Helper;
 using Microsoft.Extensions.Logging;
+using PcReservationFunctionApp.Helper;
 
 namespace PcReservationFunctionApp.Dao;
 
@@ -43,7 +43,7 @@ internal abstract class Dao<T> where T : class, ITableEntity, new()
 
     public bool Update(T entity)
     {
-        var response = TableClient.UpdateEntity(entity, ETag.All, TableUpdateMode.Merge);
+        var response = TableClient.UpdateEntity(entity, ETag.All);
         Logger.LogInformation("Updated " + entity);
         return !response.IsError;
     }
@@ -64,6 +64,19 @@ internal abstract class Dao<T> where T : class, ITableEntity, new()
         try
         {
             var response = TableClient.GetEntity<T>(partitionKey, partitionKey);
+            return response.Value;
+        }
+        catch (Exception)
+        {
+            return null;
+        }
+    }
+
+    public T Get(string partitionKey, string rowKey)
+    {
+        try
+        {
+            var response = TableClient.GetEntity<T>(partitionKey, rowKey);
             return response.Value;
         }
         catch (Exception)

@@ -21,10 +21,7 @@ public static class ObjectExtensions
 
         var props = GetProperties(obj);
 
-        if (props.Count > 0)
-        {
-            writer.WriteLine("-------------------------");
-        }
+        if (props.Count > 0) writer.WriteLine("-------------------------");
 
         foreach (var prop in props)
         {

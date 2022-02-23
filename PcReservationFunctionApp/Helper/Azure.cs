@@ -1,5 +1,4 @@
-﻿using System;
-using System.Threading.Tasks;
+﻿using System.Threading.Tasks;
 using Azure.Core;
 using Azure.Identity;
 using Microsoft.Azure.Management.Fluent;
@@ -24,6 +23,4 @@ internal static class Azure
             .WithDefaultSubscriptionAsync();
         return azure;
     }
-
-
 }

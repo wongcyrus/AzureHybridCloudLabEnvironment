@@ -77,6 +77,12 @@ public class SessionService
         {
             // The API returns an array with a single entry.
             var result = GetAsync(sessionApiUrl, isConnected, lastErrorMessage);
+            if (string.IsNullOrEmpty(result))
+            {
+                _logger.LogInformation("Empty session.");
+                return null;
+            }
+
             var session = JsonBase<Session>.FromJson(result, _logger);
             return session;
         }
