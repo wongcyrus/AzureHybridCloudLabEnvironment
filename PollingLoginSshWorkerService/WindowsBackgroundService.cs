@@ -1,5 +1,4 @@
-﻿using System.Net.Sockets;
-using Renci.SshNet;
+﻿using Renci.SshNet;
 using Session = Common.Model.Session;
 
 namespace PollingLoginSshWorkerService;
@@ -8,9 +7,9 @@ public sealed class WindowsBackgroundService : BackgroundService
 {
     private readonly ILogger<WindowsBackgroundService> _logger;
     private readonly SessionService _sessionService;
+    private string _lastErrorMessage = "";
     private Session? _session;
     private SshClient? _sshClient;
-    private string _lastErrorMessage ="";
 
     public WindowsBackgroundService(
         SessionService sessionService,
@@ -33,7 +32,7 @@ public sealed class WindowsBackgroundService : BackgroundService
             {
                 if (newSession.Equals(_session))
                 {
-                    if (_sshClient is null or { IsConnected: false })
+                    if (_sshClient is null or {IsConnected: false})
                     {
                         //Same session and reconnect.
                         _logger.LogInformation("Same session and reconnect: " + _session);
@@ -86,7 +85,7 @@ public sealed class WindowsBackgroundService : BackgroundService
             return;
         }
 
-        uint[] portNumbers = { 3389, 5900 };
+        uint[] portNumbers = {3389, 5900};
         foreach (var portNumber in portNumbers)
         {
             var port = new ForwardedPortRemote(portNumber, "localhost", portNumber);
@@ -94,7 +93,8 @@ public sealed class WindowsBackgroundService : BackgroundService
             _sshClient.AddForwardedPort(port);
             port.Start();
             _logger.LogInformation("ForwardedPortRemote IsStarted=" + port.IsStarted);
-            port.RequestReceived += (sender, args) => _logger.LogInformation("ForwardedPortRemote " + args.OriginatorHost + ":" + args.OriginatorPort);
+            port.RequestReceived += (sender, args) =>
+                _logger.LogInformation("ForwardedPortRemote " + args.OriginatorHost + ":" + args.OriginatorPort);
         }
     }
 

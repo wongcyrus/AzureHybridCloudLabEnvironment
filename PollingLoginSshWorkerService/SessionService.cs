@@ -1,17 +1,17 @@
-﻿using System.Net;
+﻿using System.Collections.Specialized;
+using System.Net;
 using System.Net.Sockets;
 using Common.Model;
 using DeviceId;
-using Microsoft.AspNetCore.WebUtilities;
 
 namespace PollingLoginSshWorkerService;
 
 public class SessionService
 {
     private const string GetSessionFunction = "/api/GetSessionFunction";
+    private readonly IAppSettings _appSettings;
 
     private readonly ILogger<WindowsBackgroundService> _logger;
-    private readonly IAppSettings _appSettings;
 
 
     public SessionService(ILogger<WindowsBackgroundService> logger, IAppSettings appSettings)
@@ -24,12 +24,8 @@ public class SessionService
     {
         var host = Dns.GetHostEntry(Dns.GetHostName());
         foreach (var ip in host.AddressList)
-        {
             if (ip.AddressFamily == AddressFamily.InterNetwork)
-            {
                 return ip.ToString();
-            }
-        }
         throw new Exception("No network adapters with an IPv4 address in the system!");
     }
 
@@ -47,24 +43,23 @@ public class SessionService
             .AddMacAddress()
             .ToString();
     }
+
     private string GetAsync(string baseUri, bool isConnected, string lastErrorMessage)
     {
-        var query = new Dictionary<string, string>()
-        {
-            ["Location"] = _appSettings.Location,
-            ["DeviceId"] = GetDeviceId(),
-            ["IpAddress"] = GetLocalIPAddress(),
-            ["MacAddress"] = GetMacAddress(),
-            ["MachineName"] = Environment.MachineName,
-            ["isConnected"] = isConnected.ToString(),
-            ["LastErrorMessage"] = lastErrorMessage,
-            ["code"] = _appSettings.Key
-        };
+        NameValueCollection queryString = System.Web.HttpUtility.ParseQueryString(string.Empty);
+        queryString.Add("Location", _appSettings.Location);
+        queryString.Add("DeviceId", GetDeviceId());
+        queryString.Add("IpAddress", GetLocalIPAddress());
+        queryString.Add("MacAddress", GetMacAddress());
+        queryString.Add("MachineName", Environment.MachineName);
+        queryString.Add("isConnected", isConnected.ToString());
+        queryString.Add("LastErrorMessage", lastErrorMessage);
+        queryString.Add("code", _appSettings.Key);
 
-        var uri = QueryHelpers.AddQueryString(baseUri, query);
+        var uri = baseUri + "?" + queryString;
+        _logger.LogInformation(uri);
         using var httpClient = new HttpClient(new HttpClientHandler
         { AutomaticDecompression = DecompressionMethods.GZip | DecompressionMethods.Deflate });
-        _logger.LogInformation(uri);
         var response = httpClient.GetAsync(uri).Result;
         response.EnsureSuccessStatusCode();
         var result = response.Content.ReadAsStringAsync().Result;
@@ -87,9 +82,10 @@ public class SessionService
             var session = JsonBase<Session>.FromJson(result, _logger);
             return session;
         }
-        catch (Exception)
+        catch (Exception ex)
         {
             _logger.LogError("Cannot access: " + sessionApiUrl);
+            _logger.LogError(ex.ToString());
             return null;
         }
     }
