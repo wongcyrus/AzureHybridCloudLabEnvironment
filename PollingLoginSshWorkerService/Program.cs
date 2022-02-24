@@ -1,5 +1,7 @@
 using PollingLoginSshWorkerService;
 using Serilog;
+using Serilog.Events;
+using Serilog.Sinks.SystemConsole.Themes;
 
 using var host = Host.CreateDefaultBuilder(args)
     .UseWindowsService(options => { options.ServiceName = "PollingLoginSshWorker Service"; })
@@ -8,14 +10,21 @@ using var host = Host.CreateDefaultBuilder(args)
         builder.SetBasePath(AppDomain.CurrentDomain.BaseDirectory)
             .AddJsonFile("appsettings.json")
             .AddJsonFile($"appsettings.{Environment.GetEnvironmentVariable("ENVIRONMENT") ?? "Production"}.json", true);
-        Log.Logger = new LoggerConfiguration() // initiate the logger configuration
-            .ReadFrom.Configuration(builder.Build()) // connect serilog to our configuration folder
-            .Enrich.FromLogContext() //Adds more information to our logs from built in Serilog 
-            .CreateLogger(); //initialise the logger
-    })
-    .ConfigureLogging((loggingBuilder) =>
+    }).
+    UseSerilog((hostingContext, loggerConfiguration) =>
     {
-        loggingBuilder.AddSerilog(Log.Logger, dispose: true);
+        var baseDir = AppDomain.CurrentDomain.BaseDirectory;
+        const string loggerTemplate = @"{Timestamp:yyyy-MM-dd HH:mm:ss} [{Level:u4}] [{SourceContext:l}] {Message:lj}{NewLine}{Exception}";
+
+        loggerConfiguration
+            .Enrich.FromLogContext() //Adds more information to our logs from built in Serilog 
+            .Enrich.WithMachineName()
+            .WriteTo.Console(LogEventLevel.Information, loggerTemplate, theme: AnsiConsoleTheme.Literate)
+            .WriteTo.File(Path.Combine(baseDir, "logs", "error.txt"), LogEventLevel.Warning, loggerTemplate,
+                rollingInterval: RollingInterval.Day, retainedFileCountLimit: 7)
+            .WriteTo.File(Path.Combine(baseDir, "logs", "info.txt"), LogEventLevel.Information, loggerTemplate,
+                rollingInterval: RollingInterval.Day, retainedFileCountLimit: 7);
+
     })
     .ConfigureServices(services =>
     {
