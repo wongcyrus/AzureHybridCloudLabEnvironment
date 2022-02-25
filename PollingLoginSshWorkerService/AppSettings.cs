@@ -11,13 +11,13 @@ public class AppSettings : IAppSettings
     }
 
     public string AzureFunctionBaseUrl => Configuration.GetSection(Section)[nameof(AzureFunctionBaseUrl)];
-    public string Key => Configuration.GetSection(Section)[nameof(Key)];
+    public string GetSessionFunctionKey => Configuration.GetSection(Section)[nameof(GetSessionFunctionKey)];
     public string Location => Configuration.GetSection(Section)[nameof(Location)];
 }
 
 public interface IAppSettings
 {
     string AzureFunctionBaseUrl { get; }
-    string Key { get; }
+    string GetSessionFunctionKey { get; }
     string Location { get; }
 }

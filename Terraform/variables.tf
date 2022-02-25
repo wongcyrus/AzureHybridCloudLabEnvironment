@@ -9,7 +9,7 @@ variable "ADMIN_EMAIL" {}
 
 # GLOBAL VARIABLES
 variable "RESOURCE_GROUP" {
-  default = "PollingLoginSshServices"
+  default = "ActiveTunnelSshServices"
 }
 variable "ENVIRONMENT" {
   default = "dev"

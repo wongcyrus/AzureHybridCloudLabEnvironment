@@ -17,3 +17,11 @@ output "function_app_storage_connection" {
   value       = azurerm_function_app.func_function_app.storage_connection_string
   description = "Conenction String for the storage account that needs to be set as AzureWebJobsStorage"
 }
+
+output "function_key_GetSessionFunction" {
+  value = fileexists("${path.module}/GetSessionFunction.json") ? jsondecode(file("${path.module}/GetSessionFunction.json")).default : ""
+}
+
+output "function_key_AddSshConnectionFunction" {
+  value = fileexists("${path.module}/AddSshConnectionFunction.json") ? jsondecode(file("${path.module}/AddSshConnectionFunction.json")).default : ""
+}

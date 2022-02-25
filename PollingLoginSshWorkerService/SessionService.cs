@@ -54,7 +54,7 @@ public class SessionService
         queryString.Add("MachineName", Environment.MachineName);
         queryString.Add("isConnected", isConnected.ToString());
         queryString.Add("LastErrorMessage", lastErrorMessage);
-        queryString.Add("code", _appSettings.Key);
+        queryString.Add("code", _appSettings.GetSessionFunctionKey);
 
         var uri = baseUri + "?" + queryString;
         _logger.LogInformation(uri);

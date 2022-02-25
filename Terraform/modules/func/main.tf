@@ -90,3 +90,29 @@ resource "null_resource" "function_app_publish" {
     build_number         = "${timestamp()}"
   }
 }
+
+resource "null_resource" "get_function_key_GetSessionFunction" {
+  provisioner "local-exec" {
+    command = "az functionapp function keys list -g ${var.RESOURCE_GROUP.name} -n ${azurerm_function_app.func_function_app.name} --function-name GetSessionFunction > ${path.module}/GetSessionFunction.json"
+  }
+  depends_on = [
+    azurerm_function_app.func_function_app,
+    null_resource.function_app_build_publish,
+  ]
+  triggers = {
+    build_number = "${timestamp()}"
+  }
+}
+
+resource "null_resource" "get_function_key_AddSshConnectionFunction" {
+  provisioner "local-exec" {
+    command = "az functionapp function keys list -g ${var.RESOURCE_GROUP.name} -n ${azurerm_function_app.func_function_app.name} --function-name AddSshConnectionFunction > ${path.module}/AddSshConnectionFunction.json"
+  }
+  depends_on = [
+    azurerm_function_app.func_function_app,
+    null_resource.function_app_build_publish,
+  ]
+  triggers = {
+    build_number = "${timestamp()}"
+  }
+}
