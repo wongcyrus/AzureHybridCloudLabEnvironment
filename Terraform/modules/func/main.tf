@@ -71,24 +71,26 @@ resource "azurerm_function_app" "func_function_app" {
 
 data "azurerm_subscription" "primary" {}
 
-locals {
-  publish_code_command = "az functionapp deployment source config-zip --resource-group ${var.RESOURCE_GROUP.name} --name ${azurerm_function_app.func_function_app.name} --src ${data.archive_file.azure_function_deployment_package.output_path}"
-}
-
 resource "null_resource" "function_app_publish" {
   provisioner "local-exec" {
-    command = local.publish_code_command
+    command = "az functionapp deployment source config-zip --resource-group ${var.RESOURCE_GROUP.name} --name ${azurerm_function_app.func_function_app.name} --src ${data.archive_file.azure_function_deployment_package.output_path}"
   }
   depends_on = [
-    local.publish_code_command,
     null_resource.function_app_build_publish,
     data.archive_file.azure_function_deployment_package
   ]
   triggers = {
-    # source_md5           = filemd5(data.archive_file.azure_function_deployment_package.output_path)
-    publish_code_command = local.publish_code_command
-    build_number         = "${timestamp()}"
+    # source_md5           = filemd5(data.archive_file.azure_function_deployment_package.output_path)    
+    build_number = "${timestamp()}"
   }
+}
+
+data "azurerm_function_app_host_keys" "host_keys" {
+  name                = azurerm_function_app.func_function_app.name
+  resource_group_name = var.RESOURCE_GROUP.name
+  depends_on = [
+    null_resource.function_app_publish
+  ]
 }
 
 resource "null_resource" "get_function_key_GetSessionFunction" {
@@ -96,11 +98,10 @@ resource "null_resource" "get_function_key_GetSessionFunction" {
     command = "az functionapp function keys list -g ${var.RESOURCE_GROUP.name} -n ${azurerm_function_app.func_function_app.name} --function-name GetSessionFunction > ${path.module}/GetSessionFunction.json"
   }
   depends_on = [
-    azurerm_function_app.func_function_app,
-    null_resource.function_app_build_publish,
+    data.azurerm_function_app_host_keys.host_keys,
   ]
   triggers = {
-    build_number = "${timestamp()}"
+    master_key = data.azurerm_function_app_host_keys.host_keys.master_key
   }
 }
 
@@ -109,10 +110,9 @@ resource "null_resource" "get_function_key_AddSshConnectionFunction" {
     command = "az functionapp function keys list -g ${var.RESOURCE_GROUP.name} -n ${azurerm_function_app.func_function_app.name} --function-name AddSshConnectionFunction > ${path.module}/AddSshConnectionFunction.json"
   }
   depends_on = [
-    azurerm_function_app.func_function_app,
-    null_resource.function_app_build_publish,
+    data.azurerm_function_app_host_keys.host_keys,
   ]
   triggers = {
-    build_number = "${timestamp()}"
+    master_key = data.azurerm_function_app_host_keys.host_keys.master_key
   }
 }
