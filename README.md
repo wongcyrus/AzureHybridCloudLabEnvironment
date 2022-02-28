@@ -17,3 +17,8 @@
 2. Run ```Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass```
 3. Copy the deployment package into a folder.
 4. To deploy the windows services  ```deploy.ps1```, and undeploy the windows services  ```deploy.ps1```.
+
+
+## How to deploy PollingLoginSshWorkerService ansible
+check for connectivity ```ansible windows -m win_ping```
+Run ```ansible-playbook InstallPollingLoginSshWorkerService.yaml```

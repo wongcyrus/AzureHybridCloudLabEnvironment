@@ -37,7 +37,7 @@ data "archive_file" "azure_function_deployment_package" {
 }
 
 resource "azurerm_function_app" "func_function_app" {
-  name                = "${var.PREFIX}-${var.ENVIRONMENT}-function-app"
+  name                = var.FUNCTION_APP_NAME
   location            = var.LOCATION
   resource_group_name = var.RESOURCE_GROUP.name
   app_service_plan_id = azurerm_app_service_plan.func_app_service_plan.id

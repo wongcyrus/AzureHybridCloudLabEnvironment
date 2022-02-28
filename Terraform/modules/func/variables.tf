@@ -1,4 +1,5 @@
 ### INPUT VARs ###
+variable "FUNCTION_APP_NAME" {}
 variable "PREFIX" {}
 variable "ENVIRONMENT" {}
 variable "LOCATION" {}

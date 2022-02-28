@@ -1,0 +1,10 @@
+- name: Install PollingLoginSshWorkerService
+  hosts: windows
+  tasks:
+  - name: Unconditionally reboot the machine
+    win_command: shutdown /r
+    register: reboot
+  - debug: msg="{{ reboot.stdout }}"      
+
+               
+ 

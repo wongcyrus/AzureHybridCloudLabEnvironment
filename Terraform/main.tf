@@ -50,6 +50,7 @@ resource "azurerm_storage_table" "session" {
 
 module "func" {
   source                    = "./modules/func"
+  FUNCTION_APP_NAME         = var.FUNCTION_APP_NAME
   LOCATION                  = var.LOCATION
   RESOURCE_GROUP            = azurerm_resource_group.func-rg
   ENVIRONMENT               = var.ENVIRONMENT

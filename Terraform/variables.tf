@@ -11,6 +11,9 @@ variable "ADMIN_EMAIL" {}
 variable "RESOURCE_GROUP" {
   default = "ActiveTunnelSshServices"
 }
+variable "FUNCTION_APP_NAME" {
+  default = "ive-lab"
+}
 variable "ENVIRONMENT" {
   default = "dev"
 }

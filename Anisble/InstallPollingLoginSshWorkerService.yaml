@@ -1,0 +1,22 @@
+- name: Install PollingLoginSshWorkerService
+  hosts: windows
+  tasks:
+    - name: Copy Packages
+      win_copy:
+        src: /mnt/c/Users/developer/source/repos/wongcyrus/PollingLoginSshServices/PollingLoginSshWorkerService/bin/Debug/net6.0/win-x64/publish/win-x64
+        dest: c:\
+    - name: Create a new service PollingLoginSshWorkerService
+      win_service:
+        name: PollingLoginSshWorkerService
+        path: c:\win-x64\PollingLoginSshWorkerService.exe
+        display_name: PollingLoginSshWorkerService
+        description: Polling Login Ssh Worker Service
+        start_mode: auto
+        state: started
+    - name: Check PollingLoginSshWorkerService is installed
+      win_service:
+        name: PollingLoginSshWorkerService
+      register: service_info
+    - debug: msg="{{ service_info.stdout }}"  
+               
+ 

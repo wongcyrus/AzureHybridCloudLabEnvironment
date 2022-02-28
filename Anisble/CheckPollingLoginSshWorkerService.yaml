@@ -1,0 +1,12 @@
+- name: Install PollingLoginSshWorkerService
+  hosts: windows
+  gather_facts: yes
+  tasks:
+    - name: Check PollingLoginSshWorkerService is installed
+      win_service:
+        name: PollingLoginSshWorkerService
+      register: service_info
+    - debug: msg="{{ inventory_hostname }} => {{ service_info.state }}"       
+
+               
+ 
