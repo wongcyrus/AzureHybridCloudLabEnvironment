@@ -1,5 +1,6 @@
 - name: Install PollingLoginSshWorkerService
   hosts: windows
+  gather_facts: no
   tasks:
     - name: Copy Packages
       win_copy:
@@ -17,6 +18,6 @@
       win_service:
         name: PollingLoginSshWorkerService
       register: service_info
-    - debug: msg="{{ansible_facts["hostname"] }} {{ inventory_hostname }} => {{ service_info.state }}" 
+    - debug: msg="{{ inventory_hostname }} => {{ service_info.state }}"
                
  

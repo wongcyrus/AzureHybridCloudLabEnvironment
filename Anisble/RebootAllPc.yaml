@@ -1,5 +1,6 @@
-- name: Install PollingLoginSshWorkerService
+- name: Reboot all PC
   hosts: windows
+  gather_facts: no
   tasks:
   - name: Unconditionally reboot the machine
     win_command: shutdown /r

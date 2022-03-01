@@ -1,5 +1,6 @@
 - name: Uninstall PollingLoginSshWorkerService
   hosts: windows
+  gather_facts: no
   tasks:
     - name: Remove PollingLoginSshWorkerService
       win_service:
