@@ -1,4 +1,4 @@
-- name: Install PollingLoginSshWorkerService
+- name: Check PollingLoginSshWorkerService
   hosts: windows
   gather_facts: yes
   tasks:
@@ -6,7 +6,6 @@
       win_service:
         name: PollingLoginSshWorkerService
       register: service_info
-    - debug: msg="{{ inventory_hostname }} => {{ service_info.state }}"       
-
+    - debug: msg="{{ansible_facts["hostname"] }} {{ inventory_hostname }} => {{ service_info.state }}"
                
  

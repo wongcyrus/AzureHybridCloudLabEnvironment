@@ -4,14 +4,10 @@
     - name: Remove PollingLoginSshWorkerService
       win_service:
         name: PollingLoginSshWorkerService
-        state: absent
-    - name: Check PollingLoginSshWorkerService is installed
-      win_service:
-        name: PollingLoginSshWorkerService
-      register: service_info
+        state: absent 
     - name: Remove directory
       ansible.windows.win_file:
-        path: /cygdrive/c/PollingLoginSshWorkerService/
+        path: c:\PollingLoginSshWorkerService\
         state: absent
 
                

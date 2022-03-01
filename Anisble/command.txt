@@ -1,2 +1,3 @@
-
 cd /mnt/c/Users/developer/source/repos/wongcyrus/PollingLoginSshServices/Anisble/
+ansible windows -m win_ping
+ansible-playbook CheckPollingLoginSshWorkerService.yaml
