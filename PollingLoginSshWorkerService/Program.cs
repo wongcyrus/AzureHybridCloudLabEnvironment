@@ -1,7 +1,9 @@
+using System.Text;
 using PollingLoginSshWorkerService;
 using Serilog;
 using Serilog.Events;
 using Serilog.Sinks.SystemConsole.Themes;
+
 
 using var host = Host.CreateDefaultBuilder(args)
     .UseWindowsService(options => { options.ServiceName = "PollingLoginSshWorker Service"; })

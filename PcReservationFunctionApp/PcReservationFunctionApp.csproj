@@ -9,6 +9,7 @@
 		<PackageReference Include="Microsoft.Azure.Management.ContainerInstance.Fluent" Version="1.38.0" />
 		<PackageReference Include="Microsoft.Azure.Management.Fluent" Version="1.38.0" />
 		<PackageReference Include="Microsoft.Azure.Management.Msi.Fluent" Version="1.38.0" />
+		<PackageReference Include="Microsoft.Azure.WebJobs.Extensions.EventHubs" Version="4.3.0" />
 		<PackageReference Include="Microsoft.Azure.WebJobs.Extensions.Storage" Version="5.0.0" />
 		<PackageReference Include="Microsoft.NET.Sdk.Functions" Version="4.0.1" />
 		<PackageReference Include="System.Configuration.ConfigurationManager" Version="6.0.0" />

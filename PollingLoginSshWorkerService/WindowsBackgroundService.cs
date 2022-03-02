@@ -1,4 +1,5 @@
-﻿using Renci.SshNet;
+﻿using Microsoft.Azure.Devices.Client;
+using Renci.SshNet;
 using Session = Common.Model.Session;
 
 namespace PollingLoginSshWorkerService;
@@ -10,7 +11,7 @@ public sealed class WindowsBackgroundService : BackgroundService
     private string _lastErrorMessage = "";
     private Session? _session;
     private SshClient? _sshClient;
-
+    
     public WindowsBackgroundService(
         SessionService sessionService,
         ILogger<WindowsBackgroundService> logger)
@@ -56,7 +57,7 @@ public sealed class WindowsBackgroundService : BackgroundService
                 _session = null;
             }
 
-            await Task.Delay(TimeSpan.FromMinutes(1), stoppingToken);
+            await Task.Delay(TimeSpan.FromSeconds(10), stoppingToken);
         }
     }
 
@@ -120,6 +121,7 @@ public sealed class WindowsBackgroundService : BackgroundService
     public override void Dispose()
     {
         CloseConnection();
+        _sessionService.Dispose();
         base.Dispose();
     }
 }

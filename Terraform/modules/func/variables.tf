@@ -8,6 +8,9 @@ variable "STORAGE_ACC_NAME" {}
 variable "STORAGE_ACC_KEY" {}
 variable "STORAGE_CONNECTION_STRING" {}
 variable "DEPLOYMENTS_NAME" {}
+variable "IOT_HUB_PRIMARY_CONNECTION_STRING" {}
+variable "EVENT_HUB_PRIMARY_CONNECTION_STRING" {}
+variable "EVENTHUB_NAME" {}
 variable "EMAIL_SMTP" {}
 variable "EMAIL_USERNAME" {}
 variable "EMAIL_PASSWORD" {}
