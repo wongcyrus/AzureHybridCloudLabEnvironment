@@ -15,13 +15,13 @@ foreach (var tableName in tables)
     await table.CreateIfNotExistsAsync();
 }
 
-//var cloudQueueClient = storageAcc.CreateCloudQueueClient();
-//var queues = new[] { "start-event", "end-event" };
-//foreach (var queueName in queues)
-//{
-//    var queue = cloudQueueClient.GetQueueReference(queueName);
-//    await queue.CreateIfNotExistsAsync();
-//}
+var cloudQueueClient = storageAcc.CreateCloudQueueClient();
+var queues = new[] { "retry" };
+foreach (var queueName in queues)
+{
+    var queue = cloudQueueClient.GetQueueReference(queueName);
+    await queue.CreateIfNotExistsAsync();
+}
 
 Console.WriteLine("Created Local Azure Storage Account resources.");
 

@@ -47,3 +47,8 @@ output "eventhub_name" {
   value = module.iot.eventhub_name
 }
 
+output "iothub_name" {
+  value = module.iot.iothub_name
+}
+
+

@@ -11,6 +11,7 @@ variable "DEPLOYMENTS_NAME" {}
 variable "IOT_HUB_PRIMARY_CONNECTION_STRING" {}
 variable "EVENT_HUB_PRIMARY_CONNECTION_STRING" {}
 variable "EVENTHUB_NAME" {}
+variable "IOTHUB_NAME" {}
 variable "EMAIL_SMTP" {}
 variable "EMAIL_USERNAME" {}
 variable "EMAIL_PASSWORD" {}

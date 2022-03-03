@@ -51,6 +51,7 @@ resource "azurerm_function_app" "func_function_app" {
     IotHubPrimaryConnectionString   = var.IOT_HUB_PRIMARY_CONNECTION_STRING
     EventHubPrimaryConnectionString = var.EVENT_HUB_PRIMARY_CONNECTION_STRING
     EventHubName                    = var.EVENTHUB_NAME
+    IotHubName                      = var.IOTHUB_NAME
     EmailSmtp                       = var.EMAIL_SMTP
     EmailUserName                   = var.EMAIL_USERNAME
     EmailPassword                   = var.EMAIL_PASSWORD

@@ -10,3 +10,6 @@ output "eventhub_name" {
   value = azurerm_eventhub.lab-pc.name
 }
 
+output "iothub_name" {
+  value = azurerm_iothub.lab-pc.name
+}

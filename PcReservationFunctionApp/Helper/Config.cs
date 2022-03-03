@@ -16,6 +16,7 @@ public class Config
         IotHubPrimaryConnectionString,
         EventHubPrimaryConnectionString,
         EventHubName,
+        IotHubName,
         AdminEmail,
         Environment,
         StorageAccountName,

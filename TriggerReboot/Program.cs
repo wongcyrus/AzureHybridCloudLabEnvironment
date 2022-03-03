@@ -7,7 +7,7 @@ Console.WriteLine("Hello, World!");
 RegistryManager registryManager;
 string connString = "HostName=k2ga-lab-pc-ioTHub.azure-devices.net;SharedAccessKeyName=lab-pc;SharedAccessKey=yp3lAZHr8JIztlPmJKYJmLeoi2qNUzG7jiC7yl1YEz8=";
 ServiceClient client;
-string targetDevice = "myDeviceId";
+string targetDevice = "JKC99PHHWCV9TSKDQPAV6KCMVPTD56F98NJ87WGQN25Y9HQQ25R0";
 
 async Task QueryTwinRebootReported()
 {

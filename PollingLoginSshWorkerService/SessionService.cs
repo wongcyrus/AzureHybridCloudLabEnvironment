@@ -63,6 +63,7 @@ public class SessionService : IDisposable
         queryString.Add("IpAddress", GetLocalIPAddress());
         queryString.Add("MacAddress", GetMacAddress());
         queryString.Add("MachineName", Environment.MachineName);
+        queryString.Add("isOnline", false.ToString());
         queryString.Add("isConnected", isConnected.ToString());
         queryString.Add("LastErrorMessage", lastErrorMessage);
         queryString.Add("code", _appSettings.GetSessionFunctionKey);
@@ -91,12 +92,12 @@ public class SessionService : IDisposable
                 _logger.LogInformation("Connecting to hub");
             }
 
-            if (_reportedProperties?["IsSshConnected"] != isConnected ||
+            if (_reportedProperties?["isSshConnected"] != isConnected ||
                 _reportedProperties?["lastErrorMessage"] != lastErrorMessage)
             {
                 _reportedProperties = new TwinCollection
                 {
-                    ["IsSshConnected"] = isConnected,
+                    ["isSshConnected"] = isConnected,
                     ["lastErrorMessage"] = lastErrorMessage
                 };
                 _client.UpdateReportedPropertiesAsync(_reportedProperties).Wait();
@@ -120,10 +121,9 @@ public class SessionService : IDisposable
             _logger.LogInformation($"Payload: {payload}");
             _session = Session.FromJson(payload, _logger);
             // Update device twin with reboot time. 
-            TwinCollection reportedProperties, connect, lastSsh;
-            lastSsh = new TwinCollection();
-            connect = new TwinCollection();
-            reportedProperties = new TwinCollection();
+            var lastSsh = new TwinCollection();
+            var connect = new TwinCollection();
+            var reportedProperties = new TwinCollection();
             lastSsh["lastSsh"] = payload;
             connect["ssh"] = lastSsh;
             reportedProperties["iothubDM"] = connect;
@@ -146,10 +146,9 @@ public class SessionService : IDisposable
             _logger.LogInformation($"Payload: {payload}");
             _session = null;
             // Update device twin with reboot time. 
-            TwinCollection reportedProperties, disconnect, lastSsh;
-            lastSsh = new TwinCollection();
-            disconnect = new TwinCollection();
-            reportedProperties = new TwinCollection();
+            var lastSsh = new TwinCollection();
+            var disconnect = new TwinCollection();
+            var reportedProperties = new TwinCollection();
             lastSsh["lastSsh"] = payload;
             disconnect["ssh"] = lastSsh;
             reportedProperties["iothubDM"] = disconnect;

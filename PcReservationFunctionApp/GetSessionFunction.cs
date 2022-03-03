@@ -1,6 +1,9 @@
 using System;
+using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Azure.Devices;
+using Microsoft.Azure.Devices.Client;
 using Microsoft.Azure.WebJobs;
 using Microsoft.Azure.WebJobs.Extensions.Http;
 using Microsoft.Extensions.Logging;
@@ -15,7 +18,7 @@ public static class GetSessionFunction
 {
     [FunctionName(nameof(GetSessionFunction))]
     // ReSharper disable once UnusedMember.Global
-    public static IActionResult Run(
+    public static async Task<IActionResult> Run(
         [HttpTrigger(AuthorizationLevel.Function, "get", Route = null)]
         HttpRequest req,
         ExecutionContext context,
@@ -23,25 +26,49 @@ public static class GetSessionFunction
     {
         log.LogInformation("GetSessionFunction HTTP trigger function processed a request.");
 
-        var a =
-            "HostName=k2ga-lab-pc-ioTHub.azure-devices.net;DeviceId=myDeviceId;SharedAccessKey=JJwFugk8beCmfumWKlR79ccSYnRANu0lETPZUpox0pQ=";
-        return new OkObjectResult(a);
-        //var computer = new Computer
-        //{
-        //    Location = req.Query["Location"],
-        //    IpAddress = req.Query["IpAddress"],
-        //    MachineName = req.Query["MachineName"],
-        //    DeviceId = req.Query["DeviceId"],
-        //    MacAddress = req.Query["MacAddress"],
-        //    IsConnected = Convert.ToBoolean(req.Query["IsConnected"]),
-        //    LastErrorMessage = req.Query["LastErrorMessage"],
-        //    PartitionKey = req.Query["Location"],
-        //    RowKey = req.Query["MacAddress"]
-        //};
+        var config = new Config(context);
+        var computerDao = new ComputerDao(config, log);
 
-        //var config = new Config(context);
-        //var computerDao = new ComputerDao(config, log);
-        //computerDao.Upsert(computer);
+        var computer = new Computer
+        {
+            Location = req.Query["Location"],
+            IpAddress = req.Query["IpAddress"],
+            MachineName = req.Query["MachineName"],
+            DeviceId = req.Query["DeviceId"],
+            MacAddress = req.Query["MacAddress"],
+            IsConnected = Convert.ToBoolean(req.Query["IsConnected"]),
+            IsOnline = Convert.ToBoolean(req.Query["IsOnline"]),
+            LastErrorMessage = req.Query["LastErrorMessage"],
+            PartitionKey = req.Query["Location"],
+            RowKey = req.Query["MacAddress"]
+        };
+
+        if (computerDao.IsNew(computer))
+        {
+            log.LogInformation("New computer.");
+            var registryManager = RegistryManager.CreateFromConnectionString(config.GetConfig(Config.Key.IotHubPrimaryConnectionString));
+            var device = new Device(computer.RowKey);
+            var deviceWithKeys = await registryManager.AddDeviceAsync(device);
+            computer.IoTConnectionString = $"HostName={config.GetConfig(Config.Key.IotHubName)}.azure-devices.net;DeviceId={device.Id};SharedAccessKey={deviceWithKeys.Authentication.SymmetricKey.PrimaryKey}";
+
+            var twin = await registryManager.GetTwinAsync(device.Id);
+            var patch =
+                $@"{{
+                    tags:{computer.ToJson()}                   
+                }}";
+            log.LogInformation(patch);
+            await registryManager.UpdateTwinAsync(twin.DeviceId, patch, twin.ETag);
+            computerDao.Add(computer);
+        }
+        else
+        {
+            log.LogInformation("Get computer.");
+            computer = computerDao.Get(computer.PartitionKey, computer.RowKey);
+        }
+        
+        return new OkObjectResult(computer.IoTConnectionString);
+
+
 
         //var sessionDao = new SessionDao(config, log);
 
@@ -92,7 +119,7 @@ public static class GetSessionFunction
         //    sshConnection.Password);
         //log.LogInformation(computer.ToString());
         //log.LogInformation(sessionPoco.ToString());
-         
+
         //return new OkObjectResult(sessionPoco.ToJson());
     }
 }
