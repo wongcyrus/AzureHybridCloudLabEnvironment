@@ -17,6 +17,7 @@ public class Computer : JsonBase<Computer>, ITableEntity
     public bool IsConnected { get; set; }
     public string LastErrorMessage { get; set; }
     public string IoTConnectionString { get; set; }
+    public string Email { get; set; }
     public string PartitionKey { get; set; }
     public string RowKey { get; set; }
     public DateTimeOffset? Timestamp { get; set; }

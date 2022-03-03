@@ -11,7 +11,7 @@ public sealed class WindowsBackgroundService : BackgroundService
     private string _lastErrorMessage = "";
     private Session? _session;
     private SshClient? _sshClient;
-    
+
     public WindowsBackgroundService(
         SessionService sessionService,
         ILogger<WindowsBackgroundService> logger)
@@ -23,17 +23,18 @@ public sealed class WindowsBackgroundService : BackgroundService
     {
         while (!stoppingToken.IsCancellationRequested)
         {
-            var newSession = _sessionService.GetSessionAsync(_sshClient != null, _lastErrorMessage);
+            _sessionService.SyncAzureIoTHub(_sshClient is { IsConnected: true }, _lastErrorMessage);
+            var newSession = _sessionService.Session;
             _lastErrorMessage = "";
 
             _logger.LogInformation("newSession:" + newSession);
-            _logger.LogInformation("_session:" + _session);
+            _logger.LogInformation("session:" + _session);
 
             if (newSession != null)
             {
                 if (newSession.Equals(_session))
                 {
-                    if (_sshClient is null or {IsConnected: false})
+                    if (_sshClient is null or { IsConnected: false })
                     {
                         //Same session and reconnect.
                         _logger.LogInformation("Same session and reconnect: " + _session);
@@ -86,7 +87,7 @@ public sealed class WindowsBackgroundService : BackgroundService
             return;
         }
 
-        uint[] portNumbers = {3389, 5900};
+        uint[] portNumbers = { 3389, 5900 };
         foreach (var portNumber in portNumbers)
         {
             var port = new ForwardedPortRemote(portNumber, "localhost", portNumber);

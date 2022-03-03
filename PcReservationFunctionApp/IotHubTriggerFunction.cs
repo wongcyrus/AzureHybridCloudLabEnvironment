@@ -44,10 +44,10 @@ namespace PcReservationFunctionApp
                 {
                     computer.IsOnline = opType!.Equals("deviceConnected");
                     computerDao.Update(computer);
-
                 }
                 else if (opType!.Equals("updateTwin"))
                 {
+                    computer.IsOnline = true;
                     if (twin.Properties.Reported != null && twin.Properties.Reported["isSshConnected"] != null)
                     {
                         computer.IsConnected = Convert.ToBoolean(twin.Properties.Reported!["isSshConnected"].Value);

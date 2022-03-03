@@ -20,15 +20,16 @@ public class SessionService : IDisposable
 
     private readonly ILogger<WindowsBackgroundService> _logger;
 
-    private string _deviceConnectionString;
-    private DeviceClient? _client = null;
-    private Session? _session = null;
-    private TwinCollection _reportedProperties;
+    private string? _deviceConnectionString;
+    private DeviceClient? _client;
+    public Session? Session { get; private set; }
+    private TwinCollection? _reportedProperties;
 
     public SessionService(ILogger<WindowsBackgroundService> logger, IAppSettings appSettings)
     {
         _logger = logger;
         _appSettings = appSettings;
+
     }
 
     private string GetLocalIPAddress()
@@ -55,7 +56,7 @@ public class SessionService : IDisposable
             .ToString();
     }
 
-    private string GetAsync(string baseUri, bool isConnected, string lastErrorMessage)
+    private string GetAsync(string baseUri)
     {
         NameValueCollection queryString = System.Web.HttpUtility.ParseQueryString(string.Empty);
         queryString.Add("Location", _appSettings.Location);
@@ -64,8 +65,8 @@ public class SessionService : IDisposable
         queryString.Add("MacAddress", GetMacAddress());
         queryString.Add("MachineName", Environment.MachineName);
         queryString.Add("isOnline", false.ToString());
-        queryString.Add("isConnected", isConnected.ToString());
-        queryString.Add("LastErrorMessage", lastErrorMessage);
+        queryString.Add("isConnected", false.ToString());
+        queryString.Add("LastErrorMessage", "");
         queryString.Add("code", _appSettings.GetSessionFunctionKey);
 
         var uri = baseUri + "?" + queryString;
@@ -78,14 +79,14 @@ public class SessionService : IDisposable
         return result;
     }
 
-    public Session? GetSessionAsync(bool isConnected, string lastErrorMessage)
+    public void SyncAzureIoTHub(bool isConnected, string lastErrorMessage)
     {
         var sessionApiUrl = _appSettings.AzureFunctionBaseUrl + GetSessionFunction;
         try
         {
             if (string.IsNullOrEmpty(_deviceConnectionString) || _client == null)
             {
-                _deviceConnectionString = GetAsync(sessionApiUrl, isConnected, lastErrorMessage);
+                _deviceConnectionString = GetAsync(sessionApiUrl);
                 _client = DeviceClient.CreateFromConnectionString(_deviceConnectionString, TransportType.Mqtt);
                 _client.SetMethodHandlerAsync(nameof(OnNewSshMessage), OnNewSshMessage, null).Wait();
                 _client.SetMethodHandlerAsync(nameof(OnRemoveSshMessage), OnRemoveSshMessage, null).Wait();
@@ -102,14 +103,12 @@ public class SessionService : IDisposable
                 };
                 _client.UpdateReportedPropertiesAsync(_reportedProperties).Wait();
             }
-
-            return _session;
         }
         catch (Exception ex)
         {
+            _deviceConnectionString = "";
             _logger.LogError("Cannot access: " + sessionApiUrl);
             _logger.LogError(ex.ToString());
-            return null;
         }
     }
 
@@ -119,7 +118,7 @@ public class SessionService : IDisposable
         {
             var payload = methodRequest.DataAsJson;
             _logger.LogInformation($"Payload: {payload}");
-            _session = Session.FromJson(payload, _logger);
+            Session = Session.FromJson(payload, _logger);
             // Update device twin with reboot time. 
             var lastSsh = new TwinCollection();
             var connect = new TwinCollection();
@@ -144,7 +143,7 @@ public class SessionService : IDisposable
         {
             var payload = methodRequest.DataAsJson;
             _logger.LogInformation($"Payload: {payload}");
-            _session = null;
+            Session = null;
             // Update device twin with reboot time. 
             var lastSsh = new TwinCollection();
             var disconnect = new TwinCollection();
