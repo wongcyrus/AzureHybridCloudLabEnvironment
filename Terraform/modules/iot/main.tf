@@ -40,28 +40,9 @@ resource "azurerm_iothub" "lab-pc" {
   }
 
   endpoint {
-    type                       = "AzureIotHub.StorageContainer"
-    connection_string          = var.PRIMARY_BLOB_CONNECTION_STRING
-    name                       = "blob"
-    batch_frequency_in_seconds = 60
-    max_chunk_size_in_bytes    = 10485760
-    container_name             = azurerm_storage_container.lab-pc.name
-    encoding                   = "Avro"
-    file_name_format           = "{iothub}/{partition}_{YYYY}_{MM}_{DD}_{HH}_{mm}"
-  }
-
-  endpoint {
     type              = "AzureIotHub.EventHub"
     connection_string = azurerm_eventhub_authorization_rule.lab-pc.primary_connection_string
     name              = "eventhub"
-  }
-
-  route {
-    name           = "blob"
-    source         = "DeviceMessages"
-    condition      = "true"
-    endpoint_names = ["blob"]
-    enabled        = true
   }
 
   route {
@@ -91,7 +72,7 @@ resource "azurerm_iothub" "lab-pc" {
   enrichment {
     key            = "tenant"
     value          = "$twin.tags.Tenant"
-    endpoint_names = ["blob", "eventhub"]
+    endpoint_names = ["eventhub"]
   }
 
   cloud_to_device {
@@ -105,7 +86,7 @@ resource "azurerm_iothub" "lab-pc" {
   }
 
   tags = {
-    purpose = "testing"
+    purpose = var.ENVIRONMENT
   }
 }
 

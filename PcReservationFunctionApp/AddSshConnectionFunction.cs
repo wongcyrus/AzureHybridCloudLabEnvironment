@@ -58,10 +58,16 @@ public static class AddSshConnectionFunction
                 var random = new Random();
                 var computer = freeComputers[random.Next(freeComputers.Count)];
                 computerDao.UpdateConnection(computer, sshConnection.Email);
-                var success = await ChangeSshConnectionToDevice(config, log, computer.RowKey, sshConnection);
+                var success = await ChangeSshConnectionToDevice(config, log, computer.GetIoTDeviceId(), sshConnection);
 
-                if (success) return new OkObjectResult(sshConnection);
-
+                if (success)
+                {
+                    sshConnection.Status = "Assigned";
+                    sshConnection.ETag = ETag.All;
+                    sshConnectionDao.Upsert(sshConnection);
+                    return new OkObjectResult(sshConnection);
+                }
+                //Rollback action
                 computer = computerDao.Get(computer.PartitionKey, computer.RowKey);
                 computerDao.UpdateConnection(computer, null);
                 log.LogInformation("IoT Direct message not success!");
@@ -76,7 +82,7 @@ public static class AddSshConnectionFunction
 
             if (computer == null) return new OkObjectResult(sshConnection);
             computerDao.UpdateConnection(computer, "");
-            await ChangeSshConnectionToDevice(config, log, computer.RowKey, null);
+            await ChangeSshConnectionToDevice(config, log, computer.GetIoTDeviceId(), null);
             sshConnectionDao.Delete(sshConnection);
             log.LogInformation("Deleted.");
             return new OkObjectResult(sshConnection);

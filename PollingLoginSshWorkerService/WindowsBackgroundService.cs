@@ -23,7 +23,7 @@ public sealed class WindowsBackgroundService : BackgroundService
     {
         while (!stoppingToken.IsCancellationRequested)
         {
-            _sessionService.SyncAzureIoTHub(_sshClient is { IsConnected: true }, _lastErrorMessage);
+            await _sessionService.SyncAzureIoTHub(_sshClient is { IsConnected: true }, _lastErrorMessage);
             var newSession = _sessionService.Session;
             _lastErrorMessage = "";
 

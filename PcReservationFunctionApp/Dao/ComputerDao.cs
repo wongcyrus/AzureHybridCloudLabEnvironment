@@ -16,7 +16,7 @@ internal class ComputerDao : Dao<Computer>
 
     public List<Computer> GetFreeComputer(string location)
     {
-        var oDataQueryEntities = TableClient.Query<Computer>($"PartitionKey eq '{location}' and IsOnline eq true and IsConnected eq false");
+        var oDataQueryEntities = TableClient.Query<Computer>($"PartitionKey eq '{location}' and IsOnline eq true and IsReserved eq false");
         return oDataQueryEntities.ToList();
     }
 
@@ -30,7 +30,7 @@ internal class ComputerDao : Dao<Computer>
     {
         try
         {
-            computer.IsConnected = !string.IsNullOrEmpty(email);
+            computer.IsReserved = !string.IsNullOrEmpty(email);
             computer.Email = email;
             TableClient.UpdateEntity(computer, computer.ETag);
             return true;

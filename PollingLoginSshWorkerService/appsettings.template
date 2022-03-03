@@ -1,0 +1,13 @@
+{
+  "Config": {
+    "AzureFunctionBaseUrl": "https://<FUNCTION_APP_NAME>.azurewebsites.net",
+    "GetSessionFunctionKey": "<FUNCTION_KEY>",
+    "Location": "<LAB_LCOCATION>"
+  },
+  "Logging": {
+    "LogLevel": {
+      "Default": "Information",
+      "Microsoft.Hosting.Lifetime": "Information"
+    }
+  }
+}

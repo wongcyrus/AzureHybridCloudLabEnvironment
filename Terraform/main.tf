@@ -49,7 +49,7 @@ resource "azurerm_storage_table" "session" {
 
 resource "azurerm_storage_queue" "retry" {
   name                 = "retry"
-  storage_account_name = azurerm_storage_account.example.name
+  storage_account_name = azurerm_storage_account.storage.name
 }
 
 module "iot" {

@@ -14,6 +14,7 @@ public class Computer : JsonBase<Computer>, ITableEntity
     public string IpAddress { get; set; }
     public string MachineName { get; set; }
     public bool IsOnline { get; set; }
+    public bool IsReserved { get; set; }
     public bool IsConnected { get; set; }
     public string LastErrorMessage { get; set; }
     public string IoTConnectionString { get; set; }
@@ -26,5 +27,10 @@ public class Computer : JsonBase<Computer>, ITableEntity
     public override string ToString()
     {
         return this.Dump();
+    }
+
+    public string GetIoTDeviceId()
+    {
+        return Location + "_" + MachineName + "_" + MacAddress;
     }
 }

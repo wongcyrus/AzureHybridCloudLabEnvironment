@@ -1,9 +1,11 @@
 ﻿using System.Collections.Specialized;
 using System.Net;
+using System.Net.NetworkInformation;
 using System.Net.Sockets;
 using System.Text;
 using Common.Model;
 using DeviceId;
+using Newtonsoft.Json;
 
 namespace PollingLoginSshWorkerService;
 
@@ -34,11 +36,10 @@ public class SessionService : IDisposable
 
     private string GetLocalIPAddress()
     {
-        var host = Dns.GetHostEntry(Dns.GetHostName());
-        foreach (var ip in host.AddressList)
-            if (ip.AddressFamily == AddressFamily.InterNetwork)
-                return ip.ToString();
-        throw new Exception("No network adapters with an IPv4 address in the system!");
+        using var socket = new Socket(AddressFamily.InterNetwork, SocketType.Dgram, 0);
+        socket.Connect("8.8.8.8", 65530);
+        var endPoint = socket.LocalEndPoint as IPEndPoint;
+        return endPoint?.Address.ToString() ?? "";
     }
 
     private string GetDeviceId()
@@ -56,7 +57,7 @@ public class SessionService : IDisposable
             .ToString();
     }
 
-    private string GetAsync(string baseUri)
+    private string GetDeviceConnectionString(string baseUri)
     {
         NameValueCollection queryString = System.Web.HttpUtility.ParseQueryString(string.Empty);
         queryString.Add("Location", _appSettings.Location);
@@ -64,8 +65,6 @@ public class SessionService : IDisposable
         queryString.Add("IpAddress", GetLocalIPAddress());
         queryString.Add("MacAddress", GetMacAddress());
         queryString.Add("MachineName", Environment.MachineName);
-        queryString.Add("isOnline", false.ToString());
-        queryString.Add("isConnected", false.ToString());
         queryString.Add("LastErrorMessage", "");
         queryString.Add("code", _appSettings.GetSessionFunctionKey);
 
@@ -79,36 +78,52 @@ public class SessionService : IDisposable
         return result;
     }
 
-    public void SyncAzureIoTHub(bool isConnected, string lastErrorMessage)
+    public async Task SyncAzureIoTHub(bool isConnected, string lastErrorMessage)
     {
         var sessionApiUrl = _appSettings.AzureFunctionBaseUrl + GetSessionFunction;
         try
         {
             if (string.IsNullOrEmpty(_deviceConnectionString) || _client == null)
             {
-                _deviceConnectionString = GetAsync(sessionApiUrl);
+                _deviceConnectionString = string.IsNullOrEmpty(_deviceConnectionString) ? GetDeviceConnectionString(sessionApiUrl) : _deviceConnectionString;
+
                 _client = DeviceClient.CreateFromConnectionString(_deviceConnectionString, TransportType.Mqtt);
+                _logger.LogInformation("After Mqtt");
                 _client.SetMethodHandlerAsync(nameof(OnNewSshMessage), OnNewSshMessage, null).Wait();
                 _client.SetMethodHandlerAsync(nameof(OnRemoveSshMessage), OnRemoveSshMessage, null).Wait();
-                _logger.LogInformation("Connecting to hub");
-            }
 
+                var twin = await _client.GetTwinAsync();
+                twin.Properties.Reported = new TwinCollection
+                {
+                    ["isSshConnected"] = false,
+                    ["lastErrorMessage"] = ""
+                };
+                _reportedProperties = twin.Properties.Reported;
+                await _client?.UpdateReportedPropertiesAsync(_reportedProperties)!;
+                _logger.LogInformation("Connected to hub");
+            }
+            //Update if changed.
             if (_reportedProperties?["isSshConnected"] != isConnected ||
                 _reportedProperties?["lastErrorMessage"] != lastErrorMessage)
             {
-                _reportedProperties = new TwinCollection
+                var twin = await _client.GetTwinAsync();
+                twin.Properties.Reported = new TwinCollection
                 {
                     ["isSshConnected"] = isConnected,
                     ["lastErrorMessage"] = lastErrorMessage
                 };
-                _client.UpdateReportedPropertiesAsync(_reportedProperties).Wait();
+                _reportedProperties = twin.Properties.Reported;
+                await _client?.UpdateReportedPropertiesAsync(_reportedProperties)!;
+                _logger.LogInformation(twin.ToJson(Formatting.Indented));
+                _logger.LogInformation("After UpdateReportedPropertiesAsync");
             }
         }
         catch (Exception ex)
         {
             _deviceConnectionString = "";
             _logger.LogError("Cannot access: " + sessionApiUrl);
-            _logger.LogError(ex.ToString());
+            _logger.LogError("ex message: " + ex?.Message);
+
         }
     }
 

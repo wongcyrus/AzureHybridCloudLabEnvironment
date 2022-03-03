@@ -39,10 +39,22 @@ namespace PcReservationFunctionApp
                     return;
                 }
                 var location = twin.Tags["Location"].Value as string;
-                var computer = computerDao.Get(location, deviceId);
+                var macAddress = twin.Tags["MacAddress"].Value as string;
+                var computer = computerDao.Get(location, macAddress);
+
+                if (computer == null)
+                {
+                    log.LogInformation($"Cannot get computer in {location} with {macAddress}");
+                    return;
+                }
+
                 if (opType!.Equals("deviceConnected") || opType!.Equals("deviceDisconnected"))
                 {
                     computer.IsOnline = opType!.Equals("deviceConnected");
+                    if (opType!.Equals("deviceDisconnected"))
+                    {
+                        computer.IsConnected = false;
+                    }
                     computerDao.Update(computer);
                 }
                 else if (opType!.Equals("updateTwin"))

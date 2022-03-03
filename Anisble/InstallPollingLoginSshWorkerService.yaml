@@ -4,16 +4,16 @@
   tasks:
     - name: Copy Packages
       win_copy:
-        src: /mnt/c/Users/developer/source/repos/wongcyrus/PollingLoginSshServices/PollingLoginSshWorkerService/bin/Debug/net6.0/win-x64/publish/win-x64
+        src: /mnt/c/Users/developer/source/repos/wongcyrus/PollingLoginSshServices/PollingLoginSshWorkerService/bin/Debug/net6.0/win-x64/
         dest: c:\PollingLoginSshWorkerService\
     - name: Create a new service PollingLoginSshWorkerService
       win_service:
         name: PollingLoginSshWorkerService
-        path: c:\PollingLoginSshWorkerService\win-x64\PollingLoginSshWorkerService.exe
+        path: c:\PollingLoginSshWorkerService\PollingLoginSshWorkerService.exe
         display_name: PollingLoginSshWorkerService
         description: Polling Login Ssh Worker Service
         start_mode: auto
-        state: started
+        state: restarted
     - name: Check PollingLoginSshWorkerService is installed
       win_service:
         name: PollingLoginSshWorkerService
