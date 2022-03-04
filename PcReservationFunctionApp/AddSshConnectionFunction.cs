@@ -36,7 +36,7 @@ public static class AddSshConnectionFunction
         var sshConnectionDao = new SshConnectionDao(config, log);
         sshConnection.PartitionKey = sshConnection.Location;
         sshConnection.RowKey = sshConnection.Email;
-        sshConnection.Status = "Unassigned";
+        sshConnection.Status = "UNASSIGNED";
         sshConnection.ETag = ETag.All;
 
         var computerDao = new ComputerDao(config, log);
@@ -45,7 +45,7 @@ public static class AddSshConnectionFunction
         if (status == "CREATED")
         {
             sshConnectionDao.Upsert(sshConnection);
-            log.LogInformation("Done Upsert. sshConnection");
+            log.LogInformation("Done Upsert sshConnection");
 
             //Find a free computer in lab.
             //If found free pc, update db, and send direct message.
@@ -57,52 +57,66 @@ public static class AddSshConnectionFunction
             {
                 var random = new Random();
                 var computer = freeComputers[random.Next(freeComputers.Count)];
-                computerDao.UpdateConnection(computer, sshConnection.Email);
+                computerDao.UpdateReservation(computer, sshConnection.Email);
                 var success = await ChangeSshConnectionToDevice(config, log, computer.GetIoTDeviceId(), sshConnection);
 
                 if (success)
                 {
-                    sshConnection.Status = "Assigned";
+                    sshConnection.Status = "ASSIGNED";
                     sshConnection.ETag = ETag.All;
+                    sshConnection.MacAddress = computer.MacAddress;
                     sshConnectionDao.Upsert(sshConnection);
                     return new OkObjectResult(sshConnection);
                 }
+
                 //Rollback action
                 computer = computerDao.Get(computer.PartitionKey, computer.RowKey);
-                computerDao.UpdateConnection(computer, null);
+                computerDao.UpdateReservation(computer, null);
                 log.LogInformation("IoT Direct message not success!");
             }
+
             //No free computer or IoT Direct message not success. 
             log.LogInformation("No Free computer.");
             return new OkObjectResult(sshConnection);
         }
+
         if (status == "DELETED" || status == "DELETING")
         {
             var computer = computerDao.GetComputer(sshConnection.Location, sshConnection.Email);
 
             if (computer == null) return new OkObjectResult(sshConnection);
-            computerDao.UpdateConnection(computer, "");
+            computerDao.UpdateReservation(computer, "");
             await ChangeSshConnectionToDevice(config, log, computer.GetIoTDeviceId(), null);
-            sshConnectionDao.Delete(sshConnection);
-            log.LogInformation("Deleted.");
+            sshConnection.Status = "COMPLETED";
+            sshConnectionDao.Upsert(sshConnection);
             return new OkObjectResult(sshConnection);
         }
+
         log.LogInformation(sshConnection.ToString());
         return new OkObjectResult($"Status {status} no action.");
     }
 
 
-    static async Task<bool> ChangeSshConnectionToDevice(Config config, ILogger log, string deviceId, SshConnection sshConnection)
+    private static async Task<bool> ChangeSshConnectionToDevice(Config config, ILogger log, string deviceId,
+        SshConnection sshConnection)
     {
         try
         {
-            var client = ServiceClient.CreateFromConnectionString((config.GetConfig(Config.Key.IotHubPrimaryConnectionString)));
+            using var client =
+                ServiceClient.CreateFromConnectionString(config.GetConfig(Config.Key.IotHubPrimaryConnectionString));
+            using var manager =
+                RegistryManager.CreateFromConnectionString(config.GetConfig(Config.Key.IotHubPrimaryConnectionString));
             if (sshConnection == null)
             {
+                var twin = await manager.GetTwinAsync(deviceId);
+                twin.Properties.Desired["session"] = "";
+                await manager.UpdateTwinAsync(twin.DeviceId, twin, twin.ETag);
+                log.LogInformation("Set session to empty in Twin.");
                 var method = new CloudToDeviceMethod("OnRemoveSshMessage")
                 {
                     ResponseTimeout = TimeSpan.FromSeconds(30)
                 };
+                //May flow exception if devices is offline.
                 await client.InvokeDeviceMethodAsync(deviceId, method);
             }
             else
@@ -111,10 +125,16 @@ public static class AddSshConnectionFunction
                 {
                     ResponseTimeout = TimeSpan.FromSeconds(30)
                 };
-                var session = new Session(sshConnection.IpAddress, sshConnection.Port, sshConnection.Username, sshConnection.Password);
+                //Let it throw exception if device is offline.
+                var session = new Session(sshConnection.IpAddress, sshConnection.Port, sshConnection.Username,
+                    sshConnection.Password);
                 method.SetPayloadJson(session.ToJson());
                 await client.InvokeDeviceMethodAsync(deviceId, method);
+                var twin = await manager.GetTwinAsync(deviceId);
+                twin.Properties.Desired["session"] = session.ToJson();
+                await manager.UpdateTwinAsync(twin.DeviceId, twin, twin.ETag);
             }
+
             return true;
         }
         catch (Exception ex)

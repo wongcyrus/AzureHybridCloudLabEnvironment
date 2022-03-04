@@ -20,6 +20,7 @@ public abstract class JsonBase<T> where T : class
     {
         try
         {
+            if (string.IsNullOrEmpty(content)) return null;
             var ms = new MemoryStream(Encoding.UTF8.GetBytes(content));
             var ser = new DataContractJsonSerializer(typeof(T));
             var obj = ser.ReadObject(ms) as T;

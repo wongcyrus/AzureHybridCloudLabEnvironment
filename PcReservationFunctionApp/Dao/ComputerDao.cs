@@ -2,7 +2,6 @@
 using System.Linq;
 using Azure;
 using Microsoft.Extensions.Logging;
-using Microsoft.WindowsAzure.Storage.Table;
 using PcReservationFunctionApp.Helper;
 using PcReservationFunctionApp.Model;
 
@@ -16,17 +15,18 @@ internal class ComputerDao : Dao<Computer>
 
     public List<Computer> GetFreeComputer(string location)
     {
-        var oDataQueryEntities = TableClient.Query<Computer>($"PartitionKey eq '{location}' and IsOnline eq true and IsReserved eq false");
+        var oDataQueryEntities =
+            TableClient.Query<Computer>($"PartitionKey eq '{location}' and IsOnline eq true and IsReserved eq false");
         return oDataQueryEntities.ToList();
     }
 
     public Computer GetComputer(string location, string email)
     {
         var oDataQueryEntities = TableClient.Query<Computer>($"PartitionKey eq '{location}' and Email eq '{email}'");
-        return oDataQueryEntities.First();
+        return oDataQueryEntities.Any() ? oDataQueryEntities.First() : null;
     }
 
-    public bool UpdateConnection(Computer computer, string email)
+    public bool UpdateReservation(Computer computer, string email)
     {
         try
         {

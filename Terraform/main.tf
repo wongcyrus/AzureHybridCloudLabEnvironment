@@ -42,11 +42,6 @@ resource "azurerm_storage_table" "ssh_Connection" {
   storage_account_name = azurerm_storage_account.storage.name
 }
 
-resource "azurerm_storage_table" "session" {
-  name                 = "Session"
-  storage_account_name = azurerm_storage_account.storage.name
-}
-
 resource "azurerm_storage_queue" "retry" {
   name                 = "retry"
   storage_account_name = azurerm_storage_account.storage.name

@@ -1,37 +1,48 @@
-﻿using System.Collections.Specialized;
-using System.Net;
-using System.Net.NetworkInformation;
+﻿using System.Net;
 using System.Net.Sockets;
 using System.Text;
+using System.Web;
 using Common.Model;
 using DeviceId;
+using Microsoft.Azure.Devices.Client;
+using Microsoft.Azure.Devices.Shared;
 using Newtonsoft.Json;
 
 namespace PollingLoginSshWorkerService;
 
-
-
-using Microsoft.Azure.Devices.Client;
-using Microsoft.Azure.Devices.Shared;
-
-
 public class SessionService : IDisposable
 {
-    private const string GetSessionFunction = "/api/GetSessionFunction";
+    private const string GetSessionFunction = "/api/GetDeviceConnectionString";
     private readonly IAppSettings _appSettings;
 
     private readonly ILogger<WindowsBackgroundService> _logger;
+    private DeviceClient? _client;
 
     private string? _deviceConnectionString;
-    private DeviceClient? _client;
-    public Session? Session { get; private set; }
+
+    private int _failureCount;
     private TwinCollection? _reportedProperties;
 
     public SessionService(ILogger<WindowsBackgroundService> logger, IAppSettings appSettings)
     {
         _logger = logger;
         _appSettings = appSettings;
+        _failureCount = 0;
+    }
 
+    public Session? CurrentSession { get; private set; }
+
+    public void Dispose()
+    {
+        _reportedProperties = new TwinCollection
+        {
+            ["IsSshConnected"] = false
+        };
+        _client?.UpdateReportedPropertiesAsync(_reportedProperties).Wait();
+        _client?.SetMethodHandlerAsync(nameof(OnNewSshMessage), null, null).Wait();
+        _client?.SetMethodHandlerAsync(nameof(OnRemoveSshMessage), null, null).Wait();
+        _client?.CloseAsync().Wait();
+        _client?.Dispose();
     }
 
     private string GetLocalIPAddress()
@@ -59,7 +70,7 @@ public class SessionService : IDisposable
 
     private string GetDeviceConnectionString(string baseUri)
     {
-        NameValueCollection queryString = System.Web.HttpUtility.ParseQueryString(string.Empty);
+        var queryString = HttpUtility.ParseQueryString(string.Empty);
         queryString.Add("Location", _appSettings.Location);
         queryString.Add("DeviceId", GetDeviceId());
         queryString.Add("IpAddress", GetLocalIPAddress());
@@ -78,19 +89,21 @@ public class SessionService : IDisposable
         return result;
     }
 
-    public async Task SyncAzureIoTHub(bool isConnected, string lastErrorMessage)
+    public async Task<int> SyncAzureIoTHub(bool isConnected, string lastErrorMessage)
     {
         var sessionApiUrl = _appSettings.AzureFunctionBaseUrl + GetSessionFunction;
         try
         {
             if (string.IsNullOrEmpty(_deviceConnectionString) || _client == null)
             {
-                _deviceConnectionString = string.IsNullOrEmpty(_deviceConnectionString) ? GetDeviceConnectionString(sessionApiUrl) : _deviceConnectionString;
+                _deviceConnectionString = string.IsNullOrEmpty(_deviceConnectionString)
+                    ? GetDeviceConnectionString(sessionApiUrl)
+                    : _deviceConnectionString;
 
                 _client = DeviceClient.CreateFromConnectionString(_deviceConnectionString, TransportType.Mqtt);
-                _logger.LogInformation("After Mqtt");
                 _client.SetMethodHandlerAsync(nameof(OnNewSshMessage), OnNewSshMessage, null).Wait();
                 _client.SetMethodHandlerAsync(nameof(OnRemoveSshMessage), OnRemoveSshMessage, null).Wait();
+                await _client.SetDesiredPropertyUpdateCallbackAsync(OnDesiredPropertyUpdate, null);
 
                 var twin = await _client.GetTwinAsync();
                 twin.Properties.Reported = new TwinCollection
@@ -99,9 +112,22 @@ public class SessionService : IDisposable
                     ["lastErrorMessage"] = ""
                 };
                 _reportedProperties = twin.Properties.Reported;
+
+                //Handle previous session in case of service or computer restart.
+                if (twin!.Properties.Desired.Contains("session"))
+                {
+                    var previousSessionString = twin!.Properties.Desired["session"]!.Value as string;
+                    if (!string.IsNullOrEmpty(previousSessionString))
+                    {
+                        CurrentSession = Session.FromJson(previousSessionString, _logger);
+                        _logger.LogInformation("Recover previous session: " + CurrentSession!.ToJson());
+                    }
+                }
+
                 await _client?.UpdateReportedPropertiesAsync(_reportedProperties)!;
                 _logger.LogInformation("Connected to hub");
             }
+
             //Update if changed.
             if (_reportedProperties?["isSshConnected"] != isConnected ||
                 _reportedProperties?["lastErrorMessage"] != lastErrorMessage)
@@ -110,21 +136,44 @@ public class SessionService : IDisposable
                 twin.Properties.Reported = new TwinCollection
                 {
                     ["isSshConnected"] = isConnected,
-                    ["lastErrorMessage"] = lastErrorMessage
+                    ["lastErrorMessage"] = lastErrorMessage,
+                    ["session"] = CurrentSession == null ? "" : CurrentSession.ToJson()
                 };
                 _reportedProperties = twin.Properties.Reported;
                 await _client?.UpdateReportedPropertiesAsync(_reportedProperties)!;
                 _logger.LogInformation(twin.ToJson(Formatting.Indented));
-                _logger.LogInformation("After UpdateReportedPropertiesAsync");
+                _logger.LogInformation("Completed UpdateReportedPropertiesAsync");
             }
+
+            return 10;
         }
         catch (Exception ex)
         {
             _deviceConnectionString = "";
             _logger.LogError("Cannot access: " + sessionApiUrl);
             _logger.LogError("ex message: " + ex?.Message);
-
+            _failureCount++;
+            return Math.Min(60 * _failureCount, 60 * 30);
         }
+    }
+
+    private async Task OnDesiredPropertyUpdate(TwinCollection desiredProperties, object userContext)
+    {
+        _logger.LogInformation("OnDesiredPropertyUpdate");
+        if (desiredProperties["session"] == null) return;
+        var sessionString = desiredProperties["session"].Value as string;
+        _logger.LogInformation("session:" + sessionString);
+
+        if (string.IsNullOrEmpty(sessionString))
+        {
+            CurrentSession = Session.FromJson(sessionString!, _logger);
+            _logger.LogInformation("Get ssh session from Desired Property: " + sessionString);
+        }
+        var reportedProperties = new TwinCollection
+        {
+            ["session"] = sessionString
+        };
+        await _client!.UpdateReportedPropertiesAsync(reportedProperties);
     }
 
     public Task<MethodResponse> OnNewSshMessage(MethodRequest methodRequest, object userContext)
@@ -133,22 +182,14 @@ public class SessionService : IDisposable
         {
             var payload = methodRequest.DataAsJson;
             _logger.LogInformation($"Payload: {payload}");
-            Session = Session.FromJson(payload, _logger);
-            // Update device twin with reboot time. 
-            var lastSsh = new TwinCollection();
-            var connect = new TwinCollection();
-            var reportedProperties = new TwinCollection();
-            lastSsh["lastSsh"] = payload;
-            connect["ssh"] = lastSsh;
-            reportedProperties["iothubDM"] = connect;
-            _client?.UpdateReportedPropertiesAsync(reportedProperties).Wait();
+            CurrentSession = Session.FromJson(payload, _logger);
         }
         catch (Exception ex)
         {
             _logger.LogError("Error in sample: {0}", ex.Message);
         }
 
-        string result = @"{""result"":""Connected.""}";
+        var result = @"{""result"":""Updated CurrentSession.""}";
         return Task.FromResult(new MethodResponse(Encoding.UTF8.GetBytes(result), 200));
     }
 
@@ -158,37 +199,34 @@ public class SessionService : IDisposable
         {
             var payload = methodRequest.DataAsJson;
             _logger.LogInformation($"Payload: {payload}");
-            Session = null;
-            // Update device twin with reboot time. 
-            var lastSsh = new TwinCollection();
-            var disconnect = new TwinCollection();
-            var reportedProperties = new TwinCollection();
-            lastSsh["lastSsh"] = payload;
-            disconnect["ssh"] = lastSsh;
-            reportedProperties["iothubDM"] = disconnect;
-            _client?.UpdateReportedPropertiesAsync(reportedProperties).Wait();
+            CurrentSession = null;
         }
         catch (Exception ex)
         {
-
             _logger.LogError("Error in sample: {0}", ex.Message);
         }
 
-        string result = @"{""result"":""Disconnected.""}";
+        var result = @"{""result"":""Removed CurrentSession.""}";
         return Task.FromResult(new MethodResponse(Encoding.UTF8.GetBytes(result), 200));
     }
 
-
-    public void Dispose()
+    public async Task UpdateConnectionStatus(bool isConnected)
     {
-        _reportedProperties = new TwinCollection
+        if (_client == null) return;
+        try
         {
-            ["IsSshConnected"] = false
-        };
-        _client?.UpdateReportedPropertiesAsync(_reportedProperties).Wait();
-        _client?.SetMethodHandlerAsync(nameof(OnNewSshMessage), null, null).Wait();
-        _client?.SetMethodHandlerAsync(nameof(OnRemoveSshMessage), null, null).Wait();
-        _client?.CloseAsync().Wait();
-        _client?.Dispose();
+            if (_reportedProperties?["isSshConnected"] == isConnected) return;
+
+            var twin = await _client.GetTwinAsync();
+            if (_reportedProperties != null)
+            {
+                _reportedProperties["isSshConnected"] = isConnected;
+                await _client?.UpdateReportedPropertiesAsync(_reportedProperties)!;
+            }
+        }
+        catch (Exception e)
+        {
+            _logger.LogError("UpdateConnectionStatus failed.");
+        }
     }
 }

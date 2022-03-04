@@ -1,5 +1,4 @@
-﻿using Microsoft.Azure.Devices.Client;
-using Renci.SshNet;
+﻿using Renci.SshNet;
 using Session = Common.Model.Session;
 
 namespace PollingLoginSshWorkerService;
@@ -23,46 +22,44 @@ public sealed class WindowsBackgroundService : BackgroundService
     {
         while (!stoppingToken.IsCancellationRequested)
         {
-            await _sessionService.SyncAzureIoTHub(_sshClient is { IsConnected: true }, _lastErrorMessage);
-            var newSession = _sessionService.Session;
+            var delay = await _sessionService.SyncAzureIoTHub(_sshClient is {IsConnected: true}, _lastErrorMessage);
+            var newSession = _sessionService.CurrentSession;
             _lastErrorMessage = "";
-
-            _logger.LogInformation("newSession:" + newSession);
-            _logger.LogInformation("session:" + _session);
 
             if (newSession != null)
             {
                 if (newSession.Equals(_session))
                 {
-                    if (_sshClient is null or { IsConnected: false })
+                    if (_sshClient is null or {IsConnected: false})
                     {
                         //Same session and reconnect.
                         _logger.LogInformation("Same session and reconnect: " + _session);
                         CloseConnection();
-                        Connect();
+                        await Connect();
                     }
                 }
                 else
                 {
                     //New session.
-                    _logger.LogInformation("New connection: " + _session);
+                    _logger.LogInformation("New connection: " + newSession);
                     _session = newSession;
                     CloseConnection();
-                    Connect();
+                    await Connect();
                 }
             }
             else
             {
-                _logger.LogInformation("No new session and close connection.");
+                _logger.LogTrace("No new session and close connection.");
                 CloseConnection();
+                await _sessionService.UpdateConnectionStatus(false);
                 _session = null;
             }
 
-            await Task.Delay(TimeSpan.FromSeconds(10), stoppingToken);
+            await Task.Delay(TimeSpan.FromSeconds(delay), stoppingToken);
         }
     }
 
-    private void Connect()
+    private async Task Connect()
     {
         if (_session == null)
         {
@@ -77,17 +74,19 @@ public sealed class WindowsBackgroundService : BackgroundService
             _sshClient = new SshClient(connectionInfo);
             _sshClient.ErrorOccurred += (s, args) => _logger.LogInformation("sshClient:" + args.Exception.Message);
             _sshClient.Connect();
+            
+            await _sessionService.UpdateConnectionStatus(_sshClient.IsConnected);
         }
         catch (Exception ex)
         {
             CloseConnection();
             _logger.LogError("Cannot connect to " + _session);
             _logger.LogError(ex.Message);
-            _lastErrorMessage = $"Connect Error {DateTime.Now.ToUniversalTime().ToString()}: {ex.Message}";
+            _lastErrorMessage = $"Connect Error {DateTime.Now.ToUniversalTime()}: {ex.Message}";
             return;
         }
 
-        uint[] portNumbers = { 3389, 5900 };
+        uint[] portNumbers = {3389, 5900};
         foreach (var portNumber in portNumbers)
         {
             var port = new ForwardedPortRemote(portNumber, "localhost", portNumber);
@@ -110,7 +109,7 @@ public sealed class WindowsBackgroundService : BackgroundService
         catch (Exception ex)
         {
             _logger.LogError(ex.ToString());
-            _lastErrorMessage = $"CloseConnection Error {DateTime.Now.ToUniversalTime().ToString()}: {ex.Message}";
+            _lastErrorMessage = $"CloseConnection Error {DateTime.Now.ToUniversalTime()}: {ex.Message}";
         }
         finally
         {

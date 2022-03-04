@@ -15,8 +15,8 @@ public static class ObjectExtensions
         }
 
         writer.Write("Hash: ");
-        writer.WriteLine(obj.GetHashCode());
-        writer.Write("Type: ");
+        writer.Write(obj.GetHashCode());
+        writer.Write("\tType: ");
         writer.WriteLine(obj.GetType());
 
         var props = GetProperties(obj);
@@ -26,8 +26,9 @@ public static class ObjectExtensions
         foreach (var prop in props)
         {
             writer.Write(prop.Key);
-            writer.Write(": ");
-            writer.WriteLine(prop.Value);
+            writer.Write("=");
+            writer.Write(prop.Value);
+            writer.Write("\t");
         }
 
         return writer.ToString();

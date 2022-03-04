@@ -1,9 +1,7 @@
-using System;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Azure.Devices;
-using Microsoft.Azure.Devices.Client;
 using Microsoft.Azure.WebJobs;
 using Microsoft.Azure.WebJobs.Extensions.Http;
 using Microsoft.Extensions.Logging;
@@ -14,9 +12,9 @@ using PcReservationFunctionApp.Model;
 namespace PcReservationFunctionApp;
 
 // ReSharper disable once UnusedMember.Global
-public static class GetSessionFunction
+public static class GetDeviceConnectionString
 {
-    [FunctionName(nameof(GetSessionFunction))]
+    [FunctionName(nameof(GetDeviceConnectionString))]
     // ReSharper disable once UnusedMember.Global
     public static async Task<IActionResult> Run(
         [HttpTrigger(AuthorizationLevel.Function, "get", Route = null)]
@@ -24,7 +22,7 @@ public static class GetSessionFunction
         ExecutionContext context,
         ILogger log)
     {
-        log.LogInformation("GetSessionFunction HTTP trigger function processed a request.");
+        log.LogInformation("GetDeviceConnectionString HTTP trigger function processed a request.");
 
         var config = new Config(context);
         var computerDao = new ComputerDao(config, log);
@@ -44,41 +42,52 @@ public static class GetSessionFunction
             RowKey = req.Query["MacAddress"]
         };
 
-        var registryManager = RegistryManager.CreateFromConnectionString(config.GetConfig(Config.Key.IotHubPrimaryConnectionString));
+        var registryManager =
+            RegistryManager.CreateFromConnectionString(config.GetConfig(Config.Key.IotHubPrimaryConnectionString));
+
+        string ioTConnectionString;
+        var device = await registryManager.GetDeviceAsync(computer.GetIoTDeviceId());
+        if (device == null) //Take care the case of deleting IoT device out of the system.
+            ioTConnectionString = await SetupIoTDevice(computer, registryManager, config, log);
+        else
+            ioTConnectionString =
+                $"HostName={config.GetConfig(Config.Key.IotHubName)}.azure-devices.net;DeviceId={computer.GetIoTDeviceId()};SharedAccessKey={device.Authentication.SymmetricKey.PrimaryKey}";
+
         if (computerDao.IsNew(computer))
         {
             log.LogInformation("New computer.");
-          
-            await RegisterDevice(log, computer, registryManager, config);
+            computer.IoTConnectionString = ioTConnectionString;
             computerDao.Add(computer);
         }
         else
         {
-            log.LogInformation("Get computer.");
-            computer = computerDao.Get(computer.PartitionKey, computer.RowKey);
-            var device = await registryManager.GetDeviceAsync(computer.GetIoTDeviceId());
-
-            if (device == null) //Take care the case of deleting IoT device out of the system.
-                await RegisterDevice(log, computer, registryManager, config);
-            computerDao.Update(computer);
+            if (ioTConnectionString != null)
+            {
+                log.LogInformation("Get and update ioTConnectionString.");
+                var previousComputer = computerDao.Get(computer.PartitionKey, computer.RowKey);
+                previousComputer.IoTConnectionString = ioTConnectionString;
+                computerDao.Update(previousComputer);
+            }
         }
 
-        return new OkObjectResult(computer.IoTConnectionString);
+        return new OkObjectResult(ioTConnectionString);
     }
 
-    private static async Task RegisterDevice(ILogger log, Computer computer, RegistryManager registryManager, Config config)
+    private static async Task<string> SetupIoTDevice(Computer computer, RegistryManager registryManager, Config config,
+        ILogger log)
     {
         var device = new Device(computer.GetIoTDeviceId());
         var deviceWithKeys = await registryManager.AddDeviceAsync(device);
-        computer.IoTConnectionString =
-            $"HostName={config.GetConfig(Config.Key.IotHubName)}.azure-devices.net;DeviceId={device.Id};SharedAccessKey={deviceWithKeys.Authentication.SymmetricKey.PrimaryKey}";
 
-        var twin = await registryManager.GetTwinAsync(device.Id);
+        var twin = await registryManager.GetTwinAsync(computer.GetIoTDeviceId());
         var patch =
             $@"{{
                     tags:{computer.ToJson()}                   
                 }}";
         log.LogInformation(patch);
         await registryManager.UpdateTwinAsync(twin.DeviceId, patch, twin.ETag);
+
+        return
+            $"HostName={config.GetConfig(Config.Key.IotHubName)}.azure-devices.net;DeviceId={computer.GetIoTDeviceId()};SharedAccessKey={deviceWithKeys.Authentication.SymmetricKey.PrimaryKey}";
     }
 }

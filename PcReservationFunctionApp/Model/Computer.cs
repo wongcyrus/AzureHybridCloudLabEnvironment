@@ -9,7 +9,7 @@ namespace PcReservationFunctionApp.Model;
 public class Computer : JsonBase<Computer>, ITableEntity
 {
     public string Location { get; set; } //PartitionKey
-    public string MacAddress { get; set; }//RowKey
+    public string MacAddress { get; set; } //RowKey
     public string DeviceId { get; set; }
     public string IpAddress { get; set; }
     public string MachineName { get; set; }
