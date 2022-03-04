@@ -18,8 +18,8 @@ variable "EMAIL_PASSWORD" {}
 variable "EMAIL_FROM_ADDRESS" {}
 variable "ADMIN_EMAIL" {}
 variable "FUNCTION_APP_FOLDER" {
-  default = "../../../PcReservationFunctionApp"
+  default = "../../../PcHubFunctionApp"
 }
 variable "FUNCTION_APP_PUBLISH_FOLDER" {
-  default = "../../../PcReservationFunctionApp/bin/Release/net6.0/publish"
+  default = "../../../PcHubFunctionApp/bin/Release/net6.0/publish"
 }

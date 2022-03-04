@@ -4,19 +4,19 @@
   tasks:
     - name: Copy Packages
       win_copy:
-        src: /mnt/c/Users/developer/source/repos/wongcyrus/PollingLoginSshServices/PollingLoginSshWorkerService/bin/Debug/net6.0/win-x64/
-        dest: c:\PollingLoginSshWorkerService\
-    - name: Create a new service PollingLoginSshWorkerService
+        src: /mnt/c/Users/developer/source/repos/wongcyrus/PollingLoginSshServices/IoTSshClientService/bin/Debug/net6.0/win-x64/
+        dest: c:\IoTSshClientService\
+    - name: Create a new service IoTSshClientService
       win_service:
-        name: PollingLoginSshWorkerService
-        path: c:\PollingLoginSshWorkerService\PollingLoginSshWorkerService.exe
-        display_name: PollingLoginSshWorkerService
-        description: Polling Login Ssh Worker Service
+        name: IoTSshClientService
+        path: c:\IoTSshClientService\IoTSshClientService.exe
+        display_name: IoTSshClientService
+        description: IoT Ssh Client Service
         start_mode: auto
         state: restarted
-    - name: Check PollingLoginSshWorkerService is installed
+    - name: Check IoTSshClientService is installed
       win_service:
-        name: PollingLoginSshWorkerService
+        name: IoTSshClientService
       register: service_info
     - debug: msg="{{ inventory_hostname }} => {{ service_info.state }}"
                

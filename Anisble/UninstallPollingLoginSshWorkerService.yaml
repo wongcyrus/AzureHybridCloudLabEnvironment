@@ -2,13 +2,13 @@
   hosts: windows
   gather_facts: no
   tasks:
-    - name: Remove PollingLoginSshWorkerService
+    - name: Remove IoTSshClientService
       win_service:
-        name: PollingLoginSshWorkerService
+        name: IoTSshClientService
         state: absent 
     - name: Remove directory
       ansible.windows.win_file:
-        path: c:\PollingLoginSshWorkerService\
+        path: c:\IoTSshClientService\
         state: absent
 
                
