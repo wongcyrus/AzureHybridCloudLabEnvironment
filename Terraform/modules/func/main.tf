@@ -97,9 +97,9 @@ data "azurerm_function_app_host_keys" "host_keys" {
   ]
 }
 
-resource "null_resource" "get_function_key_GetSessionFunction" {
+resource "null_resource" "get_function_key_GetDeviceConnectionString" {
   provisioner "local-exec" {
-    command = "az functionapp function keys list -g ${var.RESOURCE_GROUP.name} -n ${azurerm_function_app.func_function_app.name} --function-name GetSessionFunction > ${path.module}/GetSessionFunction.json"
+    command = "az functionapp function keys list -g ${var.RESOURCE_GROUP.name} -n ${azurerm_function_app.func_function_app.name} --function-name GetDeviceConnectionString > ${path.module}/GetDeviceConnectionString.json"
   }
   depends_on = [
     data.azurerm_function_app_host_keys.host_keys,

@@ -2,11 +2,11 @@
 
 ## How to deploy PcReservationFunctionApp
 1. Install Terramform and Azure Cli in Windows
-2. Run ```terraform.exe apply -auto-approve```. If there is error related to function keys, delete func/GetSessionFunction.json and func/AddSshConnectionFunction.json re-run the command as it has the timing issue.
-3. Run ```terraform.exe refresh```, and it will populate the AzureFunctionBaseUrl, LifeCycleHookUrl and GetSessionFunctionKey.
+2. Run ```terraform.exe apply -auto-approve```. If there is error related to function keys, delete func/GetDeviceConnectionString.json and func/AddSshConnectionFunction.json re-run the command as it has the timing issue.
+3. Run ```terraform.exe refresh```, and it will populate the AzureFunctionBaseUrl, LifeCycleHookUrl and GetDeviceConnectionStringKey.
 
 ## How to build PollingLoginSshWorkerService
-1. Update appsettings.json by replacing <AzureFunctionBaseUrl> and <GetSessionFunctionKey>.
+1. Update appsettings.json by replacing <AzureFunctionBaseUrl> and <GetDeviceConnectionStringKey>.
 2. Open powershell in PollingLoginSshServices\PollingLoginSshWorkerService.
 3. Run ```dotnet publish -p:PublishProfile=FolderProfile``` 
 4. Go to PollingLoginSshServices\PollingLoginSshWorkerService\bin\Debug\net6.0\win-x64\publish\win-x64\

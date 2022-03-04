@@ -77,7 +77,7 @@ public class SessionService : IDisposable
         queryString.Add("MacAddress", GetMacAddress());
         queryString.Add("MachineName", Environment.MachineName);
         queryString.Add("LastErrorMessage", "");
-        queryString.Add("code", _appSettings.GetSessionFunctionKey);
+        queryString.Add("code", _appSettings.GetDeviceConnectionString);
 
         var uri = baseUri + "?" + queryString;
         _logger.LogInformation(uri);

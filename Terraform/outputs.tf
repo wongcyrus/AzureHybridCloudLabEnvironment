@@ -31,8 +31,8 @@ output "AzureFunctionBaseUrl" {
   value = "https://${module.func.function_app_default_hostname}"
 }
 
-output "GetSessionFunctionKey" {
-  value = module.func.function_key_GetSessionFunction
+output "GetDeviceConnectionStringKey" {
+  value = module.func.function_key_GetDeviceConnectionString
 }
 
 output "iot_hub_primary_connection_string" {
