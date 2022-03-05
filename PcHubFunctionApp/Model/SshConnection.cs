@@ -4,7 +4,7 @@ using Azure;
 using Azure.Data.Tables;
 using Common.Model;
 
-namespace PcReservationFunctionApp.Model;
+namespace PcHubFunctionApp.Model;
 
 [DataContract]
 public class SshConnection : JsonBase<SshConnection>, ITableEntity

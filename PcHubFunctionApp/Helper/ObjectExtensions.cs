@@ -1,7 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.IO;
 
-namespace PcReservationFunctionApp.Helper;
+namespace PcHubFunctionApp.Helper;
 
 public static class ObjectExtensions
 {

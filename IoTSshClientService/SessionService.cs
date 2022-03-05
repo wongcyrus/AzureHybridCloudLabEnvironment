@@ -8,11 +8,11 @@ using Microsoft.Azure.Devices.Client;
 using Microsoft.Azure.Devices.Shared;
 using Newtonsoft.Json;
 
-namespace PollingLoginSshWorkerService;
+namespace IoTSshClientService;
 
 public class SessionService : IDisposable
 {
-    private const string GetSessionFunction = "/api/GetDeviceConnectionString";
+    private const string GetSessionFunction = "/api/GetDeviceConnectionStringFunction";
     private readonly IAppSettings _appSettings;
 
     private readonly ILogger<WindowsBackgroundService> _logger;
@@ -77,7 +77,7 @@ public class SessionService : IDisposable
         queryString.Add("MacAddress", GetMacAddress());
         queryString.Add("MachineName", Environment.MachineName);
         queryString.Add("LastErrorMessage", "");
-        queryString.Add("code", _appSettings.GetDeviceConnectionString);
+        queryString.Add("code", _appSettings.GetDeviceConnectionStringFunction);
 
         var uri = baseUri + "?" + queryString;
         _logger.LogInformation(uri);
@@ -226,7 +226,7 @@ public class SessionService : IDisposable
         }
         catch (Exception e)
         {
-            _logger.LogError("UpdateConnectionStatus failed.");
+            _logger.LogError("UpdateConnectionStatus failed." + e!.Message);
         }
     }
 }

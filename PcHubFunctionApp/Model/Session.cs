@@ -2,7 +2,7 @@
 using Azure;
 using Azure.Data.Tables;
 
-namespace PcReservationFunctionApp.Model;
+namespace PcHubFunctionApp.Model;
 
 internal class Session : ITableEntity
 {

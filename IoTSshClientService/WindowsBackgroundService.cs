@@ -1,7 +1,7 @@
 ﻿using Renci.SshNet;
 using Session = Common.Model.Session;
 
-namespace PollingLoginSshWorkerService;
+namespace IoTSshClientService;
 
 public sealed class WindowsBackgroundService : BackgroundService
 {

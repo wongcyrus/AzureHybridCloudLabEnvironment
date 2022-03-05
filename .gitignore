@@ -348,6 +348,5 @@ MigrationBackup/
 
 # Ionide (cross platform F# VS Code tools) working folder
 .ionide/
-Terraform/modules/func/AddSshConnectionFunction.json
-Terraform/modules/func/GetSessionFunction.json
-PollingLoginSshWorkerService/appsettings.json
+Terraform/modules/func/*.json
+IoTSshClientService/appsettings.json

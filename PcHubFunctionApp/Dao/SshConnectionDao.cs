@@ -1,8 +1,8 @@
 ﻿using Microsoft.Extensions.Logging;
-using PcReservationFunctionApp.Helper;
-using PcReservationFunctionApp.Model;
+using PcHubFunctionApp.Helper;
+using PcHubFunctionApp.Model;
 
-namespace PcReservationFunctionApp.Dao;
+namespace PcHubFunctionApp.Dao;
 
 internal class SshConnectionDao : Dao<SshConnection>
 {

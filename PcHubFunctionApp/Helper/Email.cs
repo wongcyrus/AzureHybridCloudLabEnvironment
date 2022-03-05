@@ -2,9 +2,9 @@
 using System.Net;
 using System.Net.Mail;
 using Microsoft.Extensions.Logging;
-using PcReservationFunctionApp.Model;
+using PcHubFunctionApp.Model;
 
-namespace PcReservationFunctionApp.Helper;
+namespace PcHubFunctionApp.Helper;
 
 public class Email
 {

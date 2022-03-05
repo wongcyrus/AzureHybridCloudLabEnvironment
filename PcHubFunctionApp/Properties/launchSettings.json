@@ -1,6 +1,6 @@
 {
   "profiles": {
-    "PcReservationFunctionApp": {
+    "PcHubFunctionApp": {
       "commandName": "Project",
       "commandLineArgs": "host start --port 7073 --pause-on-error"
     }

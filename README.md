@@ -1,4 +1,4 @@
-# ActiveTunnelSshServices
+# Azure Hybrid Cloud Lab Environment
 
 ## How to deploy PcReservationFunctionApp
 1. Install Terramform and Azure Cli in Windows
@@ -22,3 +22,9 @@
 ## How to deploy PollingLoginSshWorkerService ansible
 check for connectivity ```ansible windows -m win_ping```
 Run ```ansible-playbook InstallPollingLoginSshWorkerService.yaml```
+
+## How to Connect from MacOS
+1. Open terminal and create SSH tunnel. ```ssh bastion@<IP> -p22 -L 3389:0.0.0.0:3389```
+2. Enter the SSH server password.
+3. Open Remote Desktop client and connect to localhost.
+4. Enter the Windows username and passowrd.

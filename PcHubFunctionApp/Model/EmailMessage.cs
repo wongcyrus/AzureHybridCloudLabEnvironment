@@ -1,4 +1,4 @@
-﻿namespace PcReservationFunctionApp.Model;
+﻿namespace PcHubFunctionApp.Model;
 
 public class EmailMessage
 {

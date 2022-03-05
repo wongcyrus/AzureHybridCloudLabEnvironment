@@ -5,10 +5,10 @@ using Microsoft.Azure.Devices;
 using Microsoft.Azure.EventHubs;
 using Microsoft.Azure.WebJobs;
 using Microsoft.Extensions.Logging;
-using PcReservationFunctionApp.Dao;
-using PcReservationFunctionApp.Helper;
+using PcHubFunctionApp.Dao;
+using PcHubFunctionApp.Helper;
 
-namespace PcReservationFunctionApp;
+namespace PcHubFunctionApp;
 
 public class IotHubTriggerFunction
 {

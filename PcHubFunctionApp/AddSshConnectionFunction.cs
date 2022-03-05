@@ -1,18 +1,19 @@
 using System;
 using System.Threading.Tasks;
 using Azure;
+using Azure.Storage.Queues;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Azure.Devices;
 using Microsoft.Azure.WebJobs;
 using Microsoft.Azure.WebJobs.Extensions.Http;
 using Microsoft.Extensions.Logging;
-using PcReservationFunctionApp.Dao;
-using PcReservationFunctionApp.Helper;
-using PcReservationFunctionApp.Model;
+using PcHubFunctionApp.Dao;
+using PcHubFunctionApp.Helper;
+using PcHubFunctionApp.Model;
 using Session = Common.Model.Session;
 
-namespace PcReservationFunctionApp;
+namespace PcHubFunctionApp;
 
 public static class AddSshConnectionFunction
 {
@@ -76,7 +77,9 @@ public static class AddSshConnectionFunction
             }
 
             //No free computer or IoT Direct message not success. 
-            log.LogInformation("No Free computer.");
+            //QueueClient queueClient = new QueueClient(config.GetConfig(Config.Key.AzureWebJobsStorage), "retry");
+            //await queueClient.SendMessageAsync(sshConnection.ToJson());
+            //log.LogInformation("No Free computer.");
             return new OkObjectResult(sshConnection);
         }
 

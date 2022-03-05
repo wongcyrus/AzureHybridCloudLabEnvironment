@@ -5,16 +5,16 @@ using Microsoft.Azure.Devices;
 using Microsoft.Azure.WebJobs;
 using Microsoft.Azure.WebJobs.Extensions.Http;
 using Microsoft.Extensions.Logging;
-using PcReservationFunctionApp.Dao;
-using PcReservationFunctionApp.Helper;
-using PcReservationFunctionApp.Model;
+using PcHubFunctionApp.Model;
+using PcHubFunctionApp.Dao;
+using PcHubFunctionApp.Helper;
 
-namespace PcReservationFunctionApp;
+namespace PcHubFunctionApp;
 
 // ReSharper disable once UnusedMember.Global
-public static class GetDeviceConnectionString
+public static class GetDeviceConnectionStringFunction
 {
-    [FunctionName(nameof(GetDeviceConnectionString))]
+    [FunctionName(nameof(GetDeviceConnectionStringFunction))]
     // ReSharper disable once UnusedMember.Global
     public static async Task<IActionResult> Run(
         [HttpTrigger(AuthorizationLevel.Function, "get", Route = null)]

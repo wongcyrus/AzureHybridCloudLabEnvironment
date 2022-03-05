@@ -1,10 +1,10 @@
-- name: Install PollingLoginSshWorkerService
+- name: Install IoTSshClientService
   hosts: windows
   gather_facts: no
   tasks:
     - name: Copy Packages
       win_copy:
-        src: /mnt/c/Users/developer/source/repos/wongcyrus/PollingLoginSshServices/IoTSshClientService/bin/Debug/net6.0/win-x64/
+        src: /mnt/c/Users/developer/source/repos/wongcyrus/AzureHybridCloudLabEnvironment/IoTSshClientService/bin/Debug/net6.0/win-x64/
         dest: c:\IoTSshClientService\
     - name: Create a new service IoTSshClientService
       win_service:

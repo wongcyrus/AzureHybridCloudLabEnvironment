@@ -3,9 +3,9 @@ using System.Linq;
 using Azure;
 using Azure.Data.Tables;
 using Microsoft.Extensions.Logging;
-using PcReservationFunctionApp.Helper;
+using PcHubFunctionApp.Helper;
 
-namespace PcReservationFunctionApp.Dao;
+namespace PcHubFunctionApp.Dao;
 
 internal abstract class Dao<T> where T : class, ITableEntity, new()
 {

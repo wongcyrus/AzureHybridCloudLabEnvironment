@@ -1,4 +1,4 @@
-using PollingLoginSshWorkerService;
+using IoTSshClientService;
 using Serilog;
 using Serilog.Events;
 using Serilog.Sinks.SystemConsole.Themes;

@@ -2,7 +2,7 @@
 using Microsoft.Azure.WebJobs;
 using Microsoft.Extensions.Configuration;
 
-namespace PcReservationFunctionApp.Helper;
+namespace PcHubFunctionApp.Helper;
 
 public class Config
 {

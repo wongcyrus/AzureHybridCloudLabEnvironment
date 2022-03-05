@@ -1,4 +1,4 @@
-﻿namespace PollingLoginSshWorkerService;
+﻿namespace IoTSshClientService;
 
 public class AppSettings : IAppSettings
 {
@@ -11,13 +11,13 @@ public class AppSettings : IAppSettings
     }
 
     public string AzureFunctionBaseUrl => Configuration.GetSection(Section)[nameof(AzureFunctionBaseUrl)];
-    public string GetDeviceConnectionString => Configuration.GetSection(Section)[nameof(GetDeviceConnectionString)];
+    public string GetDeviceConnectionStringFunction => Configuration.GetSection(Section)[nameof(GetDeviceConnectionStringFunction)];
     public string Location => Configuration.GetSection(Section)[nameof(Location)];
 }
 
 public interface IAppSettings
 {
     string AzureFunctionBaseUrl { get; }
-    string GetDeviceConnectionString { get; }
+    string GetDeviceConnectionStringFunction { get; }
     string Location { get; }
 }

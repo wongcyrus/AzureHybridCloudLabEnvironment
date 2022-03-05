@@ -6,7 +6,7 @@ using Microsoft.Azure.Management.ResourceManager.Fluent;
 using Microsoft.Azure.Management.ResourceManager.Fluent.Authentication;
 using Microsoft.Rest;
 
-namespace PcReservationFunctionApp.Helper;
+namespace PcHubFunctionApp.Helper;
 
 internal static class Azure
 {

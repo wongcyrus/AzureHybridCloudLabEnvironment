@@ -2,10 +2,10 @@
 using System.Linq;
 using Azure;
 using Microsoft.Extensions.Logging;
-using PcReservationFunctionApp.Helper;
-using PcReservationFunctionApp.Model;
+using PcHubFunctionApp.Model;
+using PcHubFunctionApp.Helper;
 
-namespace PcReservationFunctionApp.Dao;
+namespace PcHubFunctionApp.Dao;
 
 internal class ComputerDao : Dao<Computer>
 {

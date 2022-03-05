@@ -2,9 +2,9 @@
 using Azure;
 using Azure.Data.Tables;
 using Common.Model;
-using PcReservationFunctionApp.Helper;
+using PcHubFunctionApp.Helper;
 
-namespace PcReservationFunctionApp.Model;
+namespace PcHubFunctionApp.Model;
 
 public class Computer : JsonBase<Computer>, ITableEntity
 {
