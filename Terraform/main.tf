@@ -42,8 +42,8 @@ resource "azurerm_storage_table" "ssh_Connection" {
   storage_account_name = azurerm_storage_account.storage.name
 }
 
-resource "azurerm_storage_queue" "retry" {
-  name                 = "retry"
+resource "azurerm_storage_queue" "allocate-pc" {
+  name                 = "allocate-pc"
   storage_account_name = azurerm_storage_account.storage.name
 }
 

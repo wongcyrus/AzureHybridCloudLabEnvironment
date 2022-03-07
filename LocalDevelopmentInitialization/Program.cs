@@ -16,7 +16,7 @@ foreach (var tableName in tables)
 }
 
 var cloudQueueClient = storageAcc.CreateCloudQueueClient();
-var queues = new[] { "retry" };
+var queues = new[] { "allocate-pc" };
 foreach (var queueName in queues)
 {
     var queue = cloudQueueClient.GetQueueReference(queueName);

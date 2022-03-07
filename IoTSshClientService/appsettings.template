@@ -1,7 +1,7 @@
 {
   "Config": {
     "AzureFunctionBaseUrl": "https://<FUNCTION_APP_NAME>.azurewebsites.net",
-    "GetDeviceConnectionString": "<FUNCTION_KEY>",
+    "GetDeviceConnectionStringFunctionKey": "<FUNCTION_KEY>",
     "Location": "<LAB_LCOCATION>"
   },
   "Logging": {
