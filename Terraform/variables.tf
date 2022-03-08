@@ -9,7 +9,7 @@ variable "ADMIN_EMAIL" {}
 
 # GLOBAL VARIABLES
 variable "RESOURCE_GROUP" {
-  default = "ActiveTunnelSshServices"
+  default = "AzureHybridCloudLabEnvironment"
 }
 variable "FUNCTION_APP_NAME" {
   default = "ive-lab"

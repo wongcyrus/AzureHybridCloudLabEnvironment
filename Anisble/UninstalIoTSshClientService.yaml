@@ -1,0 +1,15 @@
+- name: Uninstall PollingLoginSshWorkerService
+  hosts: windows
+  gather_facts: no
+  tasks:
+    - name: Remove IoTSshClientService
+      win_service:
+        name: IoTSshClientService
+        state: absent 
+    - name: Remove directory
+      ansible.windows.win_file:
+        path: c:\IoTSshClientService\
+        state: absent
+
+               
+ 

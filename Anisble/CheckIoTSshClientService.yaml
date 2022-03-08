@@ -1,0 +1,11 @@
+- name: Check IoTSshClientService
+  hosts: windows
+  gather_facts: yes
+  tasks:
+    - name: Check IoTSshClientService is installed
+      win_service:
+        name: IoTSshClientService
+      register: service_info
+    - debug: msg="{{ansible_facts["hostname"] }} {{ inventory_hostname }} => {{ service_info.state }}"
+               
+ 

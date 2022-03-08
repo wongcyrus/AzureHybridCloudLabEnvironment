@@ -31,6 +31,24 @@ output "AzureFunctionBaseUrl" {
   value = "https://${module.func.function_app_default_hostname}"
 }
 
-output "GetSessionFunctionKey" {
-  value = module.func.function_key_GetSessionFunction
+output "GetDeviceConnectionStringFunctionKey" {
+  value = module.func.function_key_GetDeviceConnectionStringFunction
 }
+
+output "iot_hub_primary_connection_string" {
+  value = nonsensitive(module.iot.iot_hub_primary_connection_string)
+}
+
+output "event_hub_primary_connection_string" {
+  value = nonsensitive(module.iot.event_hub_primary_connection_string)
+}
+
+output "eventhub_name" {
+  value = module.iot.eventhub_name
+}
+
+output "iothub_name" {
+  value = module.iot.iothub_name
+}
+
+

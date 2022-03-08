@@ -1,0 +1,13 @@
+- name: Install Basic Software
+  hosts: windows
+  tasks:
+    - name: Install chocolatey
+      win_chocolatey:
+          name:
+           - chocolatey
+           - chocolatey-core.extension
+          state: present  
+    - name: Install tightvnc
+      win_chocolatey:
+        name: tightvnc
+        state: present

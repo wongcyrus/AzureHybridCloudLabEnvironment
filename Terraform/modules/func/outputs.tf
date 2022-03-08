@@ -18,8 +18,8 @@ output "function_app_storage_connection" {
   description = "Conenction String for the storage account that needs to be set as AzureWebJobsStorage"
 }
 
-output "function_key_GetSessionFunction" {
-  value = fileexists("${path.module}/GetSessionFunction.json") ? jsondecode(file("${path.module}/GetSessionFunction.json")).default : ""
+output "function_key_GetDeviceConnectionStringFunction" {
+  value = fileexists("${path.module}/GetDeviceConnectionStringFunction.json") ? jsondecode(file("${path.module}/GetDeviceConnectionStringFunction.json")).default : ""
 }
 
 output "function_key_AddSshConnectionFunction" {

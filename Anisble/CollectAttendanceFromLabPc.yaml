@@ -1,0 +1,8 @@
+- name: Copy File from Lab PC
+  hosts: windows
+  become: false
+  tasks:
+    - name: Fetch file
+      ansible.builtin.fetch:
+        src: 'D:\\attendance.txt'
+        dest: "logs"

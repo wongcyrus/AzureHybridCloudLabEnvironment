@@ -42,18 +42,22 @@ resource "azurerm_function_app" "func_function_app" {
   resource_group_name = var.RESOURCE_GROUP.name
   app_service_plan_id = azurerm_app_service_plan.func_app_service_plan.id
   app_settings = {
-    FUNCTIONS_WORKER_RUNTIME       = "dotnet",
-    AzureWebJobsStorage            = var.STORAGE_CONNECTION_STRING,
-    APPINSIGHTS_INSTRUMENTATIONKEY = azurerm_application_insights.func_application_insights.instrumentation_key,
-    WEBSITE_RUN_FROM_PACKAGE       = "1"
-    StorageAccountName             = var.STORAGE_ACC_NAME
-    StorageAccountKey              = var.STORAGE_ACC_KEY
-    EmailSmtp                      = var.EMAIL_SMTP
-    EmailUserName                  = var.EMAIL_USERNAME
-    EmailPassword                  = var.EMAIL_PASSWORD
-    EmailFromAddress               = var.EMAIL_FROM_ADDRESS
-    AdminEmail                     = var.ADMIN_EMAIL
-    Salt                           = var.PREFIX
+    FUNCTIONS_WORKER_RUNTIME        = "dotnet",
+    AzureWebJobsStorage             = var.STORAGE_CONNECTION_STRING,
+    APPINSIGHTS_INSTRUMENTATIONKEY  = azurerm_application_insights.func_application_insights.instrumentation_key,
+    WEBSITE_RUN_FROM_PACKAGE        = "1"
+    StorageAccountName              = var.STORAGE_ACC_NAME
+    StorageAccountKey               = var.STORAGE_ACC_KEY
+    IotHubPrimaryConnectionString   = var.IOT_HUB_PRIMARY_CONNECTION_STRING
+    EventHubPrimaryConnectionString = var.EVENT_HUB_PRIMARY_CONNECTION_STRING
+    EventHubName                    = var.EVENTHUB_NAME
+    IotHubName                      = var.IOTHUB_NAME
+    EmailSmtp                       = var.EMAIL_SMTP
+    EmailUserName                   = var.EMAIL_USERNAME
+    EmailPassword                   = var.EMAIL_PASSWORD
+    EmailFromAddress                = var.EMAIL_FROM_ADDRESS
+    AdminEmail                      = var.ADMIN_EMAIL
+    Salt                            = var.PREFIX
   }
   os_type                    = "linux"
   storage_account_name       = var.STORAGE_ACC_NAME
@@ -93,9 +97,9 @@ data "azurerm_function_app_host_keys" "host_keys" {
   ]
 }
 
-resource "null_resource" "get_function_key_GetSessionFunction" {
+resource "null_resource" "get_function_key_GetDeviceConnectionStringFunction" {
   provisioner "local-exec" {
-    command = "az functionapp function keys list -g ${var.RESOURCE_GROUP.name} -n ${azurerm_function_app.func_function_app.name} --function-name GetSessionFunction > ${path.module}/GetSessionFunction.json"
+    command = "az functionapp function keys list -g ${var.RESOURCE_GROUP.name} -n ${azurerm_function_app.func_function_app.name} --function-name GetDeviceConnectionStringFunction > ${path.module}/GetDeviceConnectionStringFunction.json"
   }
   depends_on = [
     data.azurerm_function_app_host_keys.host_keys,
