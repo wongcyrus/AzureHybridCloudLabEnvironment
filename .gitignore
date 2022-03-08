@@ -350,3 +350,4 @@ MigrationBackup/
 .ionide/
 Terraform/modules/func/*.json
 IoTSshClientService/appsettings.json
+Anisble/logs/*

@@ -1,0 +1,12 @@
+- name: Copy File from Lab PC
+  hosts: windows
+  # gather_facts:   
+  become: false
+  tasks:
+    - name: Ansible fact - ansible_date_time
+      debug:
+        var: ansible_date_time
+    - name: Fetch file
+      ansible.builtin.fetch:
+        src: "c:\\IoTSshClientService\\logs\\info{{ansible_date_time.year}}{{ansible_date_time.month}}{{ansible_date_time.day}}.txt"
+        dest: "logs"
