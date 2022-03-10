@@ -1,0 +1,13 @@
+- name: Install Basic Software
+  hosts: windows
+  tasks:
+    - name: Install Chocolatey with PowerShell
+      ansible.windows.win_powershell:
+        script: |
+          Set-ExecutionPolicy Bypass -Scope Process -Force; [System.Net.ServicePointManager]::SecurityProtocol = [System.Net.ServicePointManager]::SecurityProtocol -bor 3072; iex ((New-Object System.Net.WebClient).DownloadString('https://community.chocolatey.org/install.ps1'))
+    - name: Update chocolatey
+      win_chocolatey:
+          name:
+           - chocolatey
+           - chocolatey-core.extension   
+          state: present      

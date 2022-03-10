@@ -1,0 +1,8 @@
+- name: Setup All
+  hosts: windows
+  gather_facts: no
+  tasks:
+- import_playbook: InstallIoTSshClientService.yaml
+- import_playbook: HideShutdownAndSleepButton.yaml
+- import_playbook: InstallVncServer.yaml
+- import_playbook: InstallChocolatey.yaml
