@@ -60,7 +60,6 @@ public class IotHubTriggerFunction
             }
             else if (opType!.Equals("updateTwin"))
             {
-                computer.IsOnline = true;
                 if (twin.Properties.Reported.Contains("isSshConnected") &&
                     twin.Properties.Reported["isSshConnected"] != null)
                     computer.IsConnected = Convert.ToBoolean(twin.Properties.Reported!["isSshConnected"].Value);

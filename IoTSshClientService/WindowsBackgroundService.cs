@@ -22,7 +22,7 @@ public sealed class WindowsBackgroundService : BackgroundService
     {
         while (!stoppingToken.IsCancellationRequested)
         {
-            var delay = await _sessionService.SyncAzureIoTHub(_sshClient is {IsConnected: true}, _lastErrorMessage);
+            var delay = await _sessionService.SyncAzureIoTHub(_sshClient is { IsConnected: true }, _lastErrorMessage);
             var newSession = _sessionService.CurrentSession;
             _lastErrorMessage = "";
 
@@ -30,7 +30,7 @@ public sealed class WindowsBackgroundService : BackgroundService
             {
                 if (newSession.Equals(_session))
                 {
-                    if (_sshClient is null or {IsConnected: false})
+                    if (_sshClient is null or { IsConnected: false })
                     {
                         //Same session and reconnect.
                         _logger.LogInformation("Same session and reconnect: " + _session);
@@ -74,7 +74,7 @@ public sealed class WindowsBackgroundService : BackgroundService
             _sshClient = new SshClient(connectionInfo);
             _sshClient.ErrorOccurred += (s, args) => _logger.LogInformation("sshClient:" + args.Exception.Message);
             _sshClient.Connect();
-            
+
             await _sessionService.UpdateConnectionStatus(_sshClient.IsConnected);
         }
         catch (Exception ex)
@@ -86,16 +86,21 @@ public sealed class WindowsBackgroundService : BackgroundService
             return;
         }
 
-        uint[] portNumbers = {3389, 5900};
+        uint[] portNumbers = { 3389, 5900 };
         foreach (var portNumber in portNumbers)
         {
-            var port = new ForwardedPortRemote(portNumber, "localhost", portNumber);
-            port.Exception += (s, args) => _logger.LogInformation("Port(" + portNumber + ")" + args.Exception.Message);
+            var port = new ForwardedPortRemote(_sessionService.GetLocalIpAddress(), portNumber, "127.0.0.1", portNumber);
+            port.Exception += (s, args) =>
+            {
+                _lastErrorMessage = "ForwardedPortRemote Error (" + portNumber + ") " + args.Exception.Message;
+                _logger.LogError(_lastErrorMessage);
+                CloseConnection();
+            };
+            port.RequestReceived += (sender, args) => _logger.LogInformation("ForwardedPortRemote RequestReceived =>" + args.OriginatorHost + ":" + args.OriginatorPort);
             _sshClient.AddForwardedPort(port);
             port.Start();
             _logger.LogInformation("ForwardedPortRemote IsStarted=" + port.IsStarted);
-            port.RequestReceived += (sender, args) =>
-                _logger.LogInformation("ForwardedPortRemote " + args.OriginatorHost + ":" + args.OriginatorPort);
+
         }
     }
 

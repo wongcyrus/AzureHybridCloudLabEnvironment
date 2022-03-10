@@ -54,7 +54,9 @@ Please run your SSH client and connect to
 IP:             {sshConnection.IpAddress}
 Port:           {sshConnection.Port}
 User:           {sshConnection.Username}
-Password:       {sshConnection.Password}
+Password:
+
+{sshConnection.Password}
 
 Regards,
 Azure Hybrid Cloud Lab Environment 

@@ -59,11 +59,13 @@ internal static class Azure
                 };
                 //Let it throw exception if device is offline.
                 var session = new Session(sshConnection.IpAddress, sshConnection.Port, sshConnection.Username,
-                    sshConnection.Password);
-                method.SetPayloadJson(session.ToJson());
+                    sshConnection.Password, sshConnection.Email, sshConnection.Lab);
+
+                var sessionJson = session.ToJson();
+                method.SetPayloadJson(sessionJson);
                 await client.InvokeDeviceMethodAsync(deviceId, method);
                 var twin = await manager.GetTwinAsync(deviceId);
-                twin.Properties.Desired["session"] = session.ToJson();
+                twin.Properties.Desired["session"] = sessionJson;
                 await manager.UpdateTwinAsync(twin.DeviceId, twin, twin.ETag);
             }
 
@@ -74,10 +76,5 @@ internal static class Azure
             log.LogInformation(ex.Message);
             return false;
         }
-    }
-    public static string Base64Encode(string plainText)
-    {
-        var plainTextBytes = System.Text.Encoding.UTF8.GetBytes(plainText);
-        return Convert.ToBase64String(plainTextBytes);
     }
 }

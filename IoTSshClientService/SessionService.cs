@@ -45,7 +45,7 @@ public class SessionService : IDisposable
         _client?.Dispose();
     }
 
-    private string GetLocalIPAddress()
+    public string GetLocalIpAddress()
     {
         using var socket = new Socket(AddressFamily.InterNetwork, SocketType.Dgram, 0);
         socket.Connect("8.8.8.8", 65530);
@@ -53,7 +53,7 @@ public class SessionService : IDisposable
         return endPoint?.Address.ToString() ?? "";
     }
 
-    private string GetDeviceId()
+    private static string GetDeviceId()
     {
         return new DeviceIdBuilder()
             .AddMachineName()
@@ -61,7 +61,7 @@ public class SessionService : IDisposable
             .ToString();
     }
 
-    private string GetMacAddress()
+    private static string GetMacAddress()
     {
         return new DeviceIdBuilder()
             .AddMacAddress()
@@ -73,7 +73,7 @@ public class SessionService : IDisposable
         var queryString = HttpUtility.ParseQueryString(string.Empty);
         queryString.Add("Location", _appSettings.Location);
         queryString.Add("DeviceId", GetDeviceId());
-        queryString.Add("IpAddress", GetLocalIPAddress());
+        queryString.Add("IpAddress", GetLocalIpAddress());
         queryString.Add("MacAddress", GetMacAddress());
         queryString.Add("MachineName", Environment.MachineName);
         queryString.Add("LastErrorMessage", "");
@@ -145,6 +145,7 @@ public class SessionService : IDisposable
                 _logger.LogInformation("Completed UpdateReportedPropertiesAsync");
             }
 
+            _failureCount = 0;
             return 10;
         }
         catch (Exception ex)
@@ -152,7 +153,7 @@ public class SessionService : IDisposable
             _deviceConnectionString = "";
             _logger.LogError("Cannot access: " + sessionApiUrl);
             _logger.LogError("ex message: " + ex?.Message);
-            _failureCount++;
+            if (_failureCount < 30) _failureCount++;
             return Math.Min(60 * _failureCount, 60 * 30);
         }
     }
