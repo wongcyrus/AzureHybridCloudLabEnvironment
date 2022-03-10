@@ -1,5 +1,6 @@
-- name: Install Basic Software
+- name: Install Chocolatey
   hosts: windows
+  serial: 5
   tasks:
     - name: Install Chocolatey with PowerShell
       ansible.windows.win_powershell:

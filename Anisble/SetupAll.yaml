@@ -5,4 +5,4 @@
 - import_playbook: InstallIoTSshClientService.yaml
 - import_playbook: HideShutdownAndSleepButton.yaml
 - import_playbook: InstallVncServer.yaml
-- import_playbook: InstallChocolatey.yaml
+# - import_playbook: InstallChocolatey.yaml
