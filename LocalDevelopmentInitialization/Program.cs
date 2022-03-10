@@ -8,7 +8,7 @@ Console.WriteLine("Create Local Azure Storage Account resources.");
 CloudStorageAccount storageAcc = CloudStorageAccount.Parse("UseDevelopmentStorage=true");
 
 CloudTableClient cloudTableClient = storageAcc.CreateCloudTableClient();
-var tables = new[] { "Computer", "SshConnection" };
+var tables = new[] { "Computer", "SshConnection", "ComputerErrorLog" };
 foreach (var tableName in tables)
 {
     var table = cloudTableClient.GetTableReference(tableName);

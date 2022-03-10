@@ -82,7 +82,7 @@ public sealed class WindowsBackgroundService : BackgroundService
             CloseConnection();
             _logger.LogError("Cannot connect to " + _session);
             _logger.LogError(ex.Message);
-            _lastErrorMessage = $"Connect Error {DateTime.Now.ToUniversalTime()}: {ex.Message}";
+            _lastErrorMessage = $"Connect Error: {ex.Message}";
             return;
         }
 
@@ -114,7 +114,7 @@ public sealed class WindowsBackgroundService : BackgroundService
         catch (Exception ex)
         {
             _logger.LogError(ex.ToString());
-            _lastErrorMessage = $"CloseConnection Error {DateTime.Now.ToUniversalTime()}: {ex.Message}";
+            _lastErrorMessage = $"CloseConnection Error: {ex.Message}";
         }
         finally
         {
