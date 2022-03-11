@@ -38,6 +38,9 @@
 	</ItemGroup>
 
 	<ItemGroup>
+		<None Update="appsettings.template">
+		  <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+		</None>
 		<None Update="install.ps1">
 			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 		</None>
