@@ -1,5 +1,7 @@
 # Azure Hybrid Cloud Lab Environment
 
+[Please read this Microsoft Tech Blog for more details](https://techcommunity.microsoft.com/t5/educator-developer-blog/azure-hybrid-cloud-lab-environment/ba-p/3251405)
+
 ## How to deploy PcReservationFunctionApp
 1. Install Terramform and Azure Cli in Windows
 2. Run ```terraform.exe apply -auto-approve```. If there is error related to function keys, delete func/GetDeviceConnectionString.json and func/AddSshConnectionFunction.json re-run the command as it has the timing issue.
