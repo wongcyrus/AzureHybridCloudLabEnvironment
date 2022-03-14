@@ -69,7 +69,6 @@ Azure Hybrid Cloud Lab Environment
             //Rollback action
             computer = computerDao.Get(computer.PartitionKey, computer.RowKey);
             computerDao.UpdateReservation(computer, null);
-            log.LogInformation("IoT Direct message not success!");
         }
        
         // Force Retry
@@ -106,13 +105,30 @@ Azure Hybrid Cloud Lab Environment
 "
         };
         email.Send(emailMessage, null);
+  
+        var computerErrorLogDao = new ComputerErrorLogDao(config, log);
+        var computerErrorLog = new ComputerErrorLog()
+        {
+            Email = sshConnection.Email,
+            DeviceId = "",
+            MachineName = "",
+            MacAddress = "",
+            IpAddress = sshConnection.IpAddress,
+            IsConnected = false,
+            IsOnline = false,
+            IsReserved = false,
+            ErrorMessage = "Cannot allocate PC",
+            Location = sshConnection.Location,
+            IoTConnectionString = "",
+            PartitionKey = sshConnection.Email,
+            RowKey = $"{DateTime.MaxValue.Ticks - DateTime.UtcNow.Ticks:D19}"
+        };
+        computerErrorLogDao.Add(computerErrorLog);
     }
     public class NoFreePcException : Exception
     {
-        private SshConnection _sshConnection;
         public NoFreePcException(SshConnection sshConnection)
         {
-            _sshConnection = sshConnection;
             Message = "No Free Pc for " + sshConnection;
         }
 
