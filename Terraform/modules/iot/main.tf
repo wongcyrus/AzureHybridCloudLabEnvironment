@@ -1,9 +1,3 @@
-resource "azurerm_storage_container" "lab-pc" {
-  name                  = "lab-pccontainer"
-  storage_account_name  = var.STORAGE_ACC_NAME
-  container_access_type = "private"
-}
-
 resource "azurerm_eventhub_namespace" "lab-pc" {
   name                = "lab-pc-namespace"
   location            = var.LOCATION

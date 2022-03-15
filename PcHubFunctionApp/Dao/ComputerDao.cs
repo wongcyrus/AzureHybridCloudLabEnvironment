@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
 using Azure;
+using Microsoft.Azure.Management.ContainerRegistry.Fluent;
 using Microsoft.Extensions.Logging;
 using PcHubFunctionApp.Model;
 using PcHubFunctionApp.Helper;
@@ -20,10 +21,23 @@ internal class ComputerDao : Dao<Computer>
         return oDataQueryEntities.ToList();
     }
 
-    public Computer GetComputer(string location, string email)
+    public Computer GetComputerByEmail(string location, string email)
     {
         var oDataQueryEntities = TableClient.Query<Computer>($"PartitionKey eq '{location}' and Email eq '{email}'");
-        return oDataQueryEntities.Any() ? oDataQueryEntities.First() : null;
+        return oDataQueryEntities.FirstOrDefault();
+    }
+
+    public Computer GetComputerByMachineName(string location, string machineName)
+    {
+        var oDataQueryEntities = TableClient.Query<Computer>($"PartitionKey eq '{location}' and MachineName eq '{machineName}'");
+        return oDataQueryEntities.FirstOrDefault();
+    }
+
+    public Computer GetComputerBySeatNumber(string location,int seatNumber)
+    {
+        var oDataQueryEntities =
+            TableClient.Query<Computer>($"PartitionKey eq '{location}'").OrderBy(c=>c.MachineName);
+        return oDataQueryEntities.ElementAtOrDefault(seatNumber);
     }
 
     public bool UpdateReservation(Computer computer, string email)

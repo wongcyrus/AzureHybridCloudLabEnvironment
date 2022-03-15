@@ -24,6 +24,8 @@ public class SshConnection : JsonBase<SshConnection>, ITableEntity
     [DataMember] public string Password { get; set; }
     [DataMember] public string Status { get; set; }
 
+    [DataMember] public string Variables { get; set; }
+
     [IgnoreDataMember] public string MacAddress { get; set; }
     [DataMember] public string PartitionKey { get; set; }
     [DataMember] public string RowKey { get; set; }

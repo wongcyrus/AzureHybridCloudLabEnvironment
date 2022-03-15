@@ -24,8 +24,10 @@ public static class AddSshConnectionFunction
         log.LogInformation("AddSshConnectionFunction HTTP trigger function processed a request.");
         var status = req.Form["Status"];
         var output = req.Form["Output"];
+        var variables = req.Form["Variables"];
 
         log.LogInformation(output);
+        log.LogInformation(variables);
         var sshConnection = SshConnection.FromJson(output, log);
         if (sshConnection == null) return new OkObjectResult("sshConnection null.");
 
@@ -35,6 +37,7 @@ public static class AddSshConnectionFunction
         sshConnection.RowKey = sshConnection.Email;
         sshConnection.Status = "UNASSIGNED";
         sshConnection.ETag = ETag.All;
+        sshConnection.Variables = variables;
 
         var computerDao = new ComputerDao(config, log);
 
@@ -49,7 +52,7 @@ public static class AddSshConnectionFunction
 
         if (status == "DELETED" || status == "DELETING")
         {
-            var computer = computerDao.GetComputer(sshConnection.Location, sshConnection.Email);
+            var computer = computerDao.GetComputerByEmail(sshConnection.Location, sshConnection.Email);
 
             if (computer == null) return new OkObjectResult(sshConnection);
             computerDao.UpdateReservation(computer, "");

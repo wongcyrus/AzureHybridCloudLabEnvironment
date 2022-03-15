@@ -1,9 +1,11 @@
 using System;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 using Azure;
 using Azure.Storage.Queues.Models;
 using Microsoft.Azure.WebJobs;
 using Microsoft.Extensions.Logging;
+using Newtonsoft.Json;
 using PcHubFunctionApp.Dao;
 using PcHubFunctionApp.Helper;
 using PcHubFunctionApp.Model;
@@ -24,15 +26,31 @@ public class AllocatePcFunction
         var sshConnectionDao = new SshConnectionDao(config, log);
         var computerDao = new ComputerDao(config, log);
 
-        //Find a free computer in lab.
-        //If found free pc, update db, and send direct message.
-        //If cannot find free pc or send direct message in error, put it in retry queue with delay, and email users.
-        var freeComputers = computerDao.GetFreeComputer(sshConnection!.Location);
-
-        if (freeComputers.Count > 0)
+        var variables = JsonConvert.DeserializeObject<Dictionary<string, string>>(sshConnection!.Variables);
+        Computer computer = null;
+        if (variables!.ContainsKey("MachineName"))
         {
-            var random = new Random();
-            var computer = freeComputers[random.Next(freeComputers.Count)];
+            computer = computerDao.GetComputerByMachineName(sshConnection!.Location, variables!["MachineName"]);
+        }
+        else if (variables!.ContainsKey("SeatNumber"))
+        {
+            computer = computerDao.GetComputerBySeatNumber(sshConnection!.Location, int.Parse(variables!["SeatNumber"]));
+        }
+        else
+        {
+            var freeComputers = computerDao.GetFreeComputer(sshConnection!.Location);
+            if (freeComputers.Count > 0)
+            {
+                //Find a free computer in lab.
+                var random = new Random();
+                computer = freeComputers[random.Next(freeComputers.Count)];
+            }
+        }
+
+        if (computer is { IsOnline: true, IsReserved: false })
+        {
+            //If found free pc, update db, and send direct message.
+            //If cannot find free pc or send direct message in error, put it in retry queue with delay, and email users.
             computerDao.UpdateReservation(computer, sshConnection.Email);
             var success = await Helper.Azure.ChangeSshConnectionToDevice(config, log, computer.GetIoTDeviceId(), sshConnection);
 
@@ -70,7 +88,7 @@ Azure Hybrid Cloud Lab Environment
             computer = computerDao.Get(computer.PartitionKey, computer.RowKey);
             computerDao.UpdateReservation(computer, null);
         }
-       
+
         // Force Retry
         throw new NoFreePcException(sshConnection);
     }
@@ -105,7 +123,7 @@ Azure Hybrid Cloud Lab Environment
 "
         };
         email.Send(emailMessage, null);
-  
+
         var computerErrorLogDao = new ComputerErrorLogDao(config, log);
         var computerErrorLog = new ComputerErrorLog()
         {
