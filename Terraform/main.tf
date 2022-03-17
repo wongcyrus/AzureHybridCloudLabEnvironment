@@ -87,7 +87,7 @@ module "func" {
   EVENT_HUB_PRIMARY_CONNECTION_STRING = module.iot.event_hub_primary_connection_string
   EVENTHUB_NAME                       = module.iot.eventhub_name
   IOTHUB_NAME                         = module.iot.iothub_name
-  BASTION_ARC_ADMIN_USERNAME          = module.bastion.admin_password
+  BASTION_ARC_ADMIN_USERNAME          = module.bastion.admin_username
   BASTION_ARC_ADMIN_PASSWORD          = module.bastion.admin_password
   BASTION_ARC_LOGIN_SERVER            = module.bastion.login_server
   EMAIL_SMTP                          = var.EMAIL_SMTP

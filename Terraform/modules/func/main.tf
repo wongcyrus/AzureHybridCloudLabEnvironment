@@ -23,7 +23,8 @@ resource "null_resource" "function_app_build_publish" {
     command     = "dotnet publish -p:PublishProfile=FolderProfile"
   }
   triggers = {
-    dir_sha1 = sha1(join("", [for f in fileset(abspath("${path.module}/${var.FUNCTION_APP_FOLDER}"), "*.cs") : filemd5(abspath("${path.module}/${var.FUNCTION_APP_FOLDER}/${f}"))]))
+    # dir_sha1 = sha1(join("", [for f in fileset(abspath("${path.module}/${var.FUNCTION_APP_FOLDER}"), "*.cs") : filemd5(abspath("${path.module}/${var.FUNCTION_APP_FOLDER}/${f}"))]))
+    build_number = "${timestamp()}"
   }
 }
 
