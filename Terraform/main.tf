@@ -63,6 +63,15 @@ module "iot" {
   depends_on                     = [azurerm_resource_group.func-rg]
 }
 
+module "bastion" {
+  source         = "./modules/bastion"
+  LOCATION       = var.LOCATION
+  RESOURCE_GROUP = azurerm_resource_group.func-rg
+  ENVIRONMENT    = var.ENVIRONMENT
+  PREFIX         = random_string.prefix.result
+  depends_on     = [azurerm_resource_group.func-rg]
+}
+
 module "func" {
   source                              = "./modules/func"
   FUNCTION_APP_NAME                   = var.FUNCTION_APP_NAME
@@ -78,6 +87,9 @@ module "func" {
   EVENT_HUB_PRIMARY_CONNECTION_STRING = module.iot.event_hub_primary_connection_string
   EVENTHUB_NAME                       = module.iot.eventhub_name
   IOTHUB_NAME                         = module.iot.iothub_name
+  BASTION_ARC_ADMIN_USERNAME          = module.bastion.admin_password
+  BASTION_ARC_ADMIN_PASSWORD          = module.bastion.admin_password
+  BASTION_ARC_LOGIN_SERVER            = module.bastion.login_server
   EMAIL_SMTP                          = var.EMAIL_SMTP
   EMAIL_USERNAME                      = var.EMAIL_USERNAME
   EMAIL_PASSWORD                      = var.EMAIL_PASSWORD

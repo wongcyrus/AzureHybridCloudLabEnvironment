@@ -52,6 +52,9 @@ resource "azurerm_function_app" "func_function_app" {
     EventHubPrimaryConnectionString = var.EVENT_HUB_PRIMARY_CONNECTION_STRING
     EventHubName                    = var.EVENTHUB_NAME
     IotHubName                      = var.IOTHUB_NAME
+    BastionArcAdminUsername         = var.BASTION_ARC_ADMIN_USERNAME
+    BastionArcAdminPassword         = var.BASTION_ARC_ADMIN_PASSWORD
+    BastionArcLoginServer           = var.BASTION_ARC_LOGIN_SERVER
     EmailSmtp                       = var.EMAIL_SMTP
     EmailUserName                   = var.EMAIL_USERNAME
     EmailPassword                   = var.EMAIL_PASSWORD

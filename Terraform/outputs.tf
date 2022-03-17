@@ -51,4 +51,16 @@ output "iothub_name" {
   value = module.iot.iothub_name
 }
 
+output "bastion_acr_admin_username" {
+  value = module.bastion.admin_username
+}
+
+output "bastion_acr_admin_password" {
+  value = nonsensitive(module.bastion.admin_password)
+}
+
+output "bastion_acr_login_server" {
+  value = module.bastion.login_server
+}
+
 
