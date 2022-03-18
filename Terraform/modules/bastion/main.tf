@@ -17,11 +17,7 @@ resource "azurerm_container_registry_task" "build_bastion_image_task" {
     dockerfile_path      = "Dockerfile"
     context_path         = "https://github.com/wongcyrus/ssh-tunneling-bastion#main"
     context_access_token = "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"
-    image_names          = ["ssh-tunneling-bastion:latest"]
-    arguments = {
-      AZURE_CLI_VERSION = "2.32.0"
-      TERRAFORM_VERSION = "1.1.4"
-    }
+    image_names          = ["ssh-tunneling-bastion:latest"]   
   }
 }
 

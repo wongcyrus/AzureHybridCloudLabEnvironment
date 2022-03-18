@@ -30,3 +30,11 @@ Run ```ansible-playbook InstallIoTSshClientService.yaml```
 2. Enter the SSH server password.
 3. Open Remote Desktop client and connect to localhost.
 4. Enter the Windows username and passowrd.
+
+
+## PC Revervation 
+You can set SshConnction.Variables
+With MachineName
+{"Email":"cywong@vtc.edu.hk","MachineName":"L332-A0","SeatNumber":"0"}
+With just seat number, and it pick from the list computer in lab
+{"Email":"cywong@vtc.edu.hk","SeatNumber":"0"}

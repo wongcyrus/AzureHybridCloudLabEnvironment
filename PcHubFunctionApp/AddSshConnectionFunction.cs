@@ -58,12 +58,19 @@ public static class AddSshConnectionFunction
 
         log.LogInformation(status);
 
+        var sshInformation = new Dictionary<string, string>
+        {
+            {"Email",sshConnection.Email},
+            {"Lab", sshConnection.Lab},
+            {"SshStatus", sshConnection.Status},
+            {"Status", status}
+        };
         if (status == "CREATED")
         {
             sshConnectionDao.Upsert(sshConnection);
             allocatePcQueue.Add(sshConnection);
             log.LogInformation("Added to allocate pc queue.");
-            return new JsonResult(sshConnection);
+            return new JsonResult(sshInformation);
         }
 
         if (status == "DELETED" || status == "DELETING")
@@ -95,12 +102,12 @@ Azure Hybrid Cloud Lab Environment
                 email.Send(emailMessage, null);
             }
 
-
-            return new JsonResult(sshConnection);
+            sshInformation["SshStatus"] = sshConnection.Status;
+            return new JsonResult(sshInformation);
         }
 
         log.LogInformation(sshConnection.ToString());
-        return new OkObjectResult($"Status {status} no action.");
+        return new JsonResult(sshInformation);
     }
 
 

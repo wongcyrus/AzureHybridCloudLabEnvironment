@@ -76,31 +76,30 @@ public sealed class WindowsBackgroundService : BackgroundService
             _sshClient.Connect();
 
             await _sessionService.UpdateConnectionStatus(_sshClient.IsConnected);
+
+            uint[] portNumbers = { 3389, 5900 };
+            foreach (var portNumber in portNumbers)
+            {
+                var port = new ForwardedPortRemote(_sessionService.GetLocalIpAddress(), portNumber, "127.0.0.1", portNumber);
+                port.Exception += (s, args) =>
+                {
+                    _lastErrorMessage = "ForwardedPortRemote Error (" + portNumber + ") " + args.Exception.Message;
+                    _logger.LogError(_lastErrorMessage);
+                    CloseConnection();
+                };
+                port.RequestReceived += (sender, args) => _logger.LogInformation("ForwardedPortRemote RequestReceived =>" + args.OriginatorHost + ":" + args.OriginatorPort);
+                _sshClient.AddForwardedPort(port);
+                port.Start();
+                _logger.LogInformation("ForwardedPortRemote IsStarted=" + port.IsStarted);
+            }
         }
         catch (Exception ex)
         {
+
             CloseConnection();
             _logger.LogError("Cannot connect to " + _session);
             _logger.LogError(ex.Message);
             _lastErrorMessage = $"Connect Error: {ex.Message}";
-            return;
-        }
-
-        uint[] portNumbers = { 3389, 5900 };
-        foreach (var portNumber in portNumbers)
-        {
-            var port = new ForwardedPortRemote(_sessionService.GetLocalIpAddress(), portNumber, "127.0.0.1", portNumber);
-            port.Exception += (s, args) =>
-            {
-                _lastErrorMessage = "ForwardedPortRemote Error (" + portNumber + ") " + args.Exception.Message;
-                _logger.LogError(_lastErrorMessage);
-                CloseConnection();
-            };
-            port.RequestReceived += (sender, args) => _logger.LogInformation("ForwardedPortRemote RequestReceived =>" + args.OriginatorHost + ":" + args.OriginatorPort);
-            _sshClient.AddForwardedPort(port);
-            port.Start();
-            _logger.LogInformation("ForwardedPortRemote IsStarted=" + port.IsStarted);
-
         }
     }
 
@@ -109,6 +108,7 @@ public sealed class WindowsBackgroundService : BackgroundService
         if (_sshClient == null) return;
         try
         {
+            if (_sshClient.IsConnected) _sshClient.Disconnect();
             _sshClient.Dispose();
         }
         catch (Exception ex)
