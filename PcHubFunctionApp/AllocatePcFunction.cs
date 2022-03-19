@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using System.Web;
 using Azure;
 using Azure.Storage.Queues.Models;
 using Microsoft.Azure.WebJobs;
@@ -58,9 +59,15 @@ public class AllocatePcFunction
             {
                 sshConnection.Status = "ASSIGNED";
                 sshConnection.ETag = ETag.All;
-                sshConnection.MacAddress = computer.MacAddress;
+                sshConnection.ComputerId = computer.RowKey;
                 sshConnectionDao.Upsert(sshConnection);
                 var email = new Email(config, log);
+                var appName = Environment.ExpandEnvironmentVariables("%WEBSITE_SITE_NAME%");
+                var queryString = HttpUtility.ParseQueryString(string.Empty);
+                queryString.Add("Lab", sshConnection.Lab);
+                queryString.Add("Email", sshConnection.Email);
+                queryString.Add("Token", sshConnection.Password.Substring(0,10));
+                var connectionToPcUrl = $"https://{appName}.azurewebsites.net/api/ConnectToPcFunction?" + queryString;
                 var emailMessage = new EmailMessage
                 {
                     Subject = $"{sshConnection.Lab}: Your PC in {sshConnection.Location}",
@@ -68,13 +75,9 @@ public class AllocatePcFunction
                     Body = $@"
 Dear Student,
 
-Please run your SSH client and connect to 
-IP:             {sshConnection.IpAddress}
-Port:           {sshConnection.Port}
-User:           {sshConnection.Username}
-Password:
+Please get your PC login information with this link:
 
-{sshConnection.Password}
+{connectionToPcUrl}
 
 Regards,
 Azure Hybrid Cloud Lab Environment 
@@ -106,7 +109,7 @@ Azure Hybrid Cloud Lab Environment
 
         sshConnection.Status = "NO_PC_AVAILABLE";
         sshConnection.ETag = ETag.All;
-        sshConnection.MacAddress = "";
+        sshConnection.ComputerId = "";
         sshConnectionDao.Upsert(sshConnection);
         var email = new Email(config, log);
         var emailMessage = new EmailMessage

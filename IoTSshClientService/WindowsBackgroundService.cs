@@ -76,9 +76,7 @@ public sealed class WindowsBackgroundService : BackgroundService
             _sshClient = new SshClient(connectionInfo);
             _sshClient.ErrorOccurred += (s, args) => _logger.LogInformation("sshClient:" + args.Exception.Message);
             _sshClient.Connect();
-
-            await _sessionService.UpdateConnectionStatus(_sshClient.IsConnected);
-
+            
             _forwardedPorts = new List<ForwardedPortRemote>();
             uint[] portNumbers = { 3389, 5900 };
             foreach (var portNumber in portNumbers)
@@ -94,8 +92,13 @@ public sealed class WindowsBackgroundService : BackgroundService
                 _sshClient.AddForwardedPort(port);
                 port.Start();
                 _forwardedPorts.Add(port);
+                
                 _logger.LogInformation("ForwardedPortRemote IsStarted=" + port.IsStarted);
             }
+
+            Task.Delay(5000).Wait();
+            var allPortsForwardingStarted = _forwardedPorts.All(c => c.IsStarted);
+            await _sessionService.UpdateConnectionStatus(_sshClient.IsConnected && allPortsForwardingStarted);
         }
         catch (Exception ex)
         {

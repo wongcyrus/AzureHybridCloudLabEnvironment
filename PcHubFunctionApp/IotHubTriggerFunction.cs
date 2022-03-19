@@ -44,7 +44,7 @@ public class IotHubTriggerFunction
             }
 
             var location = twin.Tags["Location"].Value as string;
-            var macAddress = twin.Tags["MacAddress"].Value as string;
+            var macAddress = twin.Tags["ComputerId"].Value as string;
             var computer = computerDao.Get(location, macAddress);
 
             if (computer == null)
