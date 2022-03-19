@@ -1,10 +1,9 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
 using Azure;
-using Microsoft.Azure.Management.ContainerRegistry.Fluent;
 using Microsoft.Extensions.Logging;
-using PcHubFunctionApp.Model;
 using PcHubFunctionApp.Helper;
+using PcHubFunctionApp.Model;
 
 namespace PcHubFunctionApp.Dao;
 
@@ -29,14 +28,15 @@ internal class ComputerDao : Dao<Computer>
 
     public Computer GetComputerByMachineName(string location, string machineName)
     {
-        var oDataQueryEntities = TableClient.Query<Computer>($"PartitionKey eq '{location}' and MachineName eq '{machineName}'");
+        var oDataQueryEntities =
+            TableClient.Query<Computer>($"PartitionKey eq '{location}' and MachineName eq '{machineName}'");
         return oDataQueryEntities.FirstOrDefault();
     }
 
-    public Computer GetComputerBySeatNumber(string location,int seatNumber)
+    public Computer GetComputerBySeatNumber(string location, int seatNumber)
     {
         var oDataQueryEntities =
-            TableClient.Query<Computer>($"PartitionKey eq '{location}'").OrderBy(c=>c.MachineName);
+            TableClient.Query<Computer>($"PartitionKey eq '{location}'").OrderBy(c => c.MachineName);
         return oDataQueryEntities.ElementAtOrDefault(seatNumber);
     }
 

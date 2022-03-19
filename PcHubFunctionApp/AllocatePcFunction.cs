@@ -11,14 +11,14 @@ using PcHubFunctionApp.Dao;
 using PcHubFunctionApp.Helper;
 using PcHubFunctionApp.Model;
 
-
 namespace PcHubFunctionApp;
 
 public class AllocatePcFunction
 {
     [FunctionName(nameof(RunAllocatePcFunction))]
     [ExponentialBackoffRetry(1, "00:01:00", "00:05:00")]
-    public async Task RunAllocatePcFunction([QueueTrigger("allocate-pc")] QueueMessage cloudQueueMessage, ExecutionContext context, ILogger log)
+    public async Task RunAllocatePcFunction([QueueTrigger("allocate-pc")] QueueMessage cloudQueueMessage,
+        ExecutionContext context, ILogger log)
     {
         log.LogInformation($"Queue trigger ({cloudQueueMessage.DequeueCount}): {cloudQueueMessage.Body}");
 
@@ -35,7 +35,8 @@ public class AllocatePcFunction
         }
         else if (variables!.ContainsKey("SeatNumber"))
         {
-            computer = computerDao.GetComputerBySeatNumber(sshConnection!.Location, int.Parse(variables!["SeatNumber"]));
+            computer = computerDao.GetComputerBySeatNumber(sshConnection!.Location,
+                int.Parse(variables!["SeatNumber"]));
         }
         else
         {
@@ -48,12 +49,13 @@ public class AllocatePcFunction
             }
         }
 
-        if (computer is { IsOnline: true, IsReserved: false })
+        if (computer is {IsOnline: true, IsReserved: false})
         {
             //If found free pc, update db, and send direct message.
             //If cannot find free pc or send direct message in error, put it in retry queue with delay, and email users.
             computerDao.UpdateReservation(computer, sshConnection.Email);
-            var success = await Helper.Azure.ChangeSshConnectionToDevice(config, log, computer.GetIoTDeviceId(), sshConnection);
+            var success =
+                await Helper.Azure.ChangeSshConnectionToDevice(config, log, computer.GetIoTDeviceId(), sshConnection);
 
             if (success)
             {
@@ -66,7 +68,7 @@ public class AllocatePcFunction
                 var queryString = HttpUtility.ParseQueryString(string.Empty);
                 queryString.Add("Location", sshConnection.Location);
                 queryString.Add("Email", sshConnection.Email);
-                queryString.Add("Token", sshConnection.Password.Substring(0,10));
+                queryString.Add("Token", sshConnection.Password.Substring(0, 10));
                 var connectionToPcUrl = $"https://{appName}.azurewebsites.net/api/ConnectToPcFunction?" + queryString;
                 var emailMessage = new EmailMessage
                 {
@@ -97,9 +99,11 @@ Azure Hybrid Cloud Lab Environment
     }
 
     [FunctionName(nameof(RunAllocatePcPoisonFunction))]
-    public void RunAllocatePcPoisonFunction([QueueTrigger("allocate-pc-poison")] QueueMessage cloudQueueMessage, ExecutionContext context, ILogger log)
+    public void RunAllocatePcPoisonFunction([QueueTrigger("allocate-pc-poison")] QueueMessage cloudQueueMessage,
+        ExecutionContext context, ILogger log)
     {
-        log.LogInformation($"Queue trigger RunAllocatePcPoisonFunction ({cloudQueueMessage.DequeueCount}): {cloudQueueMessage.Body}");
+        log.LogInformation(
+            $"Queue trigger RunAllocatePcPoisonFunction ({cloudQueueMessage.DequeueCount}): {cloudQueueMessage.Body}");
 
         var sshConnection = SshConnection.FromJson(cloudQueueMessage.Body.ToString(), log);
         var config = new Config(context);
@@ -128,7 +132,7 @@ Azure Hybrid Cloud Lab Environment
         email.Send(emailMessage, null);
 
         var computerErrorLogDao = new ComputerErrorLogDao(config, log);
-        var computerErrorLog = new ComputerErrorLog()
+        var computerErrorLog = new ComputerErrorLog
         {
             Email = sshConnection.Email,
             DeviceId = "",
@@ -146,6 +150,7 @@ Azure Hybrid Cloud Lab Environment
         };
         computerErrorLogDao.Add(computerErrorLog);
     }
+
     public class NoFreePcException : Exception
     {
         public NoFreePcException(SshConnection sshConnection)

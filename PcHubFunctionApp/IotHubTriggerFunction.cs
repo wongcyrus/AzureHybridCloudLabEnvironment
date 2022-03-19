@@ -1,5 +1,4 @@
 using System;
-using System.Globalization;
 using System.Text;
 using System.Threading.Tasks;
 using Microsoft.Azure.Devices;
@@ -69,11 +68,12 @@ public class IotHubTriggerFunction
                     twin.Properties.Reported["lastErrorMessage"] != null)
                 {
                     var reportedErrorMessage = twin.Properties.Reported!["lastErrorMessage"].Value;
-                    if (!string.IsNullOrEmpty(reportedErrorMessage) && !computer.LastErrorMessage.Equals(reportedErrorMessage))
+                    if (!string.IsNullOrEmpty(reportedErrorMessage) &&
+                        !computer.LastErrorMessage.Equals(reportedErrorMessage))
                     {
                         var computerErrorLogDao = new ComputerErrorLogDao(config, log);
                         computer.LastErrorMessage = twin.Properties.Reported!["lastErrorMessage"].Value;
-                        var computerErrorLog = new ComputerErrorLog()
+                        var computerErrorLog = new ComputerErrorLog
                         {
                             Email = computer.Email,
                             DeviceId = computer.DeviceId,

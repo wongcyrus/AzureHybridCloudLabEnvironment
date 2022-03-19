@@ -82,7 +82,7 @@ public class SessionService : IDisposable
         var uri = baseUri + "?" + queryString;
         _logger.LogInformation(uri);
         using var httpClient = new HttpClient(new HttpClientHandler
-        { AutomaticDecompression = DecompressionMethods.GZip | DecompressionMethods.Deflate });
+            {AutomaticDecompression = DecompressionMethods.GZip | DecompressionMethods.Deflate});
         var response = httpClient.GetAsync(uri).Result;
         response.EnsureSuccessStatusCode();
         var result = response.Content.ReadAsStringAsync().Result;
@@ -170,6 +170,7 @@ public class SessionService : IDisposable
             CurrentSession = Session.FromJson(sessionString!, _logger);
             _logger.LogInformation("Get ssh session from Desired Property: " + sessionString);
         }
+
         var reportedProperties = new TwinCollection
         {
             ["session"] = sessionString

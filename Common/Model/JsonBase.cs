@@ -1,7 +1,7 @@
-﻿using Microsoft.Extensions.Logging;
-using System.Runtime.Serialization;
+﻿using System.Runtime.Serialization;
 using System.Runtime.Serialization.Json;
 using System.Text;
+using Microsoft.Extensions.Logging;
 
 namespace Common.Model;
 
@@ -29,7 +29,7 @@ public abstract class JsonBase<T> where T : class
         }
         catch (Exception e)
         {
-            logger.LogError(message: e.ToString());
+            logger.LogError(e.ToString());
             return null;
         }
     }

@@ -5,9 +5,9 @@ using Microsoft.Azure.Devices;
 using Microsoft.Azure.WebJobs;
 using Microsoft.Azure.WebJobs.Extensions.Http;
 using Microsoft.Extensions.Logging;
-using PcHubFunctionApp.Model;
 using PcHubFunctionApp.Dao;
 using PcHubFunctionApp.Helper;
+using PcHubFunctionApp.Model;
 
 namespace PcHubFunctionApp;
 

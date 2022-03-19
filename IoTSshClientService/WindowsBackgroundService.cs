@@ -7,11 +7,11 @@ public sealed class WindowsBackgroundService : BackgroundService
 {
     private readonly ILogger<WindowsBackgroundService> _logger;
     private readonly SessionService _sessionService;
+
+    private List<ForwardedPortRemote>? _forwardedPorts;
     private string _lastErrorMessage = "";
     private Session? _session;
     private SshClient? _sshClient;
-
-    private List<ForwardedPortRemote> ? _forwardedPorts;
 
     public WindowsBackgroundService(
         SessionService sessionService,
@@ -24,7 +24,7 @@ public sealed class WindowsBackgroundService : BackgroundService
     {
         while (!stoppingToken.IsCancellationRequested)
         {
-            var delay = await _sessionService.SyncAzureIoTHub(_sshClient is { IsConnected: true }, _lastErrorMessage);
+            var delay = await _sessionService.SyncAzureIoTHub(_sshClient is {IsConnected: true}, _lastErrorMessage);
             var newSession = _sessionService.CurrentSession;
             _lastErrorMessage = "";
 
@@ -32,7 +32,7 @@ public sealed class WindowsBackgroundService : BackgroundService
             {
                 if (newSession.Equals(_session))
                 {
-                    if (_sshClient is null or { IsConnected: false })
+                    if (_sshClient is null or {IsConnected: false})
                     {
                         //Same session and reconnect.
                         _logger.LogInformation("Same session and reconnect: " + _session);
@@ -76,23 +76,26 @@ public sealed class WindowsBackgroundService : BackgroundService
             _sshClient = new SshClient(connectionInfo);
             _sshClient.ErrorOccurred += (s, args) => _logger.LogInformation("sshClient:" + args.Exception.Message);
             _sshClient.Connect();
-            
+
             _forwardedPorts = new List<ForwardedPortRemote>();
-            uint[] portNumbers = { 3389, 5900 };
+            uint[] portNumbers = {3389, 5900};
             foreach (var portNumber in portNumbers)
             {
-                var port = new ForwardedPortRemote(_sessionService.GetLocalIpAddress(), portNumber, "127.0.0.1", portNumber);
+                var port = new ForwardedPortRemote(_sessionService.GetLocalIpAddress(), portNumber, "127.0.0.1",
+                    portNumber);
                 port.Exception += (s, args) =>
                 {
                     _lastErrorMessage = "ForwardedPortRemote Error (" + portNumber + ") " + args.Exception.Message;
                     _logger.LogError(_lastErrorMessage);
                     CloseConnection();
                 };
-                port.RequestReceived += (sender, args) => _logger.LogInformation("ForwardedPortRemote RequestReceived =>" + args.OriginatorHost + ":" + args.OriginatorPort);
+                port.RequestReceived += (sender, args) =>
+                    _logger.LogInformation("ForwardedPortRemote RequestReceived =>" + args.OriginatorHost + ":" +
+                                           args.OriginatorPort);
                 _sshClient.AddForwardedPort(port);
                 port.Start();
                 _forwardedPorts.Add(port);
-                
+
                 _logger.LogInformation("ForwardedPortRemote IsStarted=" + port.IsStarted);
             }
 
@@ -102,7 +105,6 @@ public sealed class WindowsBackgroundService : BackgroundService
         }
         catch (Exception ex)
         {
-
             CloseConnection();
             _logger.LogError("Cannot connect to " + _session);
             _logger.LogError(ex.Message);
@@ -117,12 +119,10 @@ public sealed class WindowsBackgroundService : BackgroundService
         {
             if (_forwardedPorts != null)
             {
-                foreach (var port in _forwardedPorts.Where(port => port.IsStarted))
-                {
-                    port.Stop();
-                }
+                foreach (var port in _forwardedPorts.Where(port => port.IsStarted)) port.Stop();
                 _forwardedPorts = null;
             }
+
             if (_sshClient.IsConnected) _sshClient.Disconnect();
             _sshClient.Dispose();
         }

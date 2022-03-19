@@ -10,14 +10,14 @@ using PcHubFunctionApp.Dao;
 using PcHubFunctionApp.Helper;
 using PcHubFunctionApp.Model;
 
-
 namespace PcHubFunctionApp;
 
 public static class AddSshConnectionFunction
 {
     [FunctionName(nameof(AddSshConnectionFunction))]
     public static async Task<IActionResult> Run(
-        [HttpTrigger(AuthorizationLevel.Function, "post", Route = null)] HttpRequest req,
+        [HttpTrigger(AuthorizationLevel.Function, "post", Route = null)]
+        HttpRequest req,
         [Queue("allocate-pc")] ICollector<SshConnection> allocatePcQueue,
         ExecutionContext context,
         ILogger log)
@@ -59,7 +59,7 @@ public static class AddSshConnectionFunction
 
         var sshInformation = new Dictionary<string, string>
         {
-            {"Email",sshConnection.Email},
+            {"Email", sshConnection.Email},
             {"Lab", sshConnection.Lab},
             {"SshStatus", sshConnection.Status},
             {"Status", status}
@@ -108,7 +108,4 @@ Azure Hybrid Cloud Lab Environment
         log.LogInformation(sshConnection.ToString());
         return new JsonResult(sshInformation);
     }
-
-
-
 }
