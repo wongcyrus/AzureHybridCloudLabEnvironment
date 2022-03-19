@@ -6,7 +6,6 @@ using Microsoft.Azure.WebJobs;
 using Microsoft.Azure.WebJobs.Extensions.Http;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Logging;
-using Newtonsoft.Json;
 using PcHubFunctionApp.Dao;
 using PcHubFunctionApp.Helper;
 
@@ -15,27 +14,30 @@ namespace PcHubFunctionApp
     public static class ConnectToPcFunction
     {
         [FunctionName(nameof(ConnectToPcFunction))]
-        public static async Task<IActionResult> Run(
+        public static IActionResult Run(
             [HttpTrigger(AuthorizationLevel.Anonymous, "get", Route = null)] HttpRequest req,
             ExecutionContext context,
             ILogger log)
         {
             log.LogInformation("ConnectToPcFunction HTTP trigger processed a request.");
 
-            string lab = req.Query["Lab"];
+            string location = req.Query["Location"];
             string email = req.Query["Email"];
             string token = req.Query["Token"];
             var config = new Config(context);
             var sshConnectionDao = new SshConnectionDao(config, log);
-            var sshConnection = sshConnectionDao.Get(lab, email);
+            var sshConnection = sshConnectionDao.Get(location, email);
 
-            if (!sshConnection.Password.StartsWith(token)) return new OkObjectResult("Invalid Information.");
+            if (sshConnection == null) return new OkObjectResult("Cannot get ssh connection information.");
+            if (!sshConnection.Password.Substring(0, 10).Equals(token)) return new OkObjectResult("Invalid Token.");
             var computerDao = new ComputerDao(config, log);
-            var computer = computerDao.Get(lab, sshConnection.ComputerId);
+            var computer = computerDao.Get(location, sshConnection.MacAddress);
+            if (computer == null) return new OkObjectResult("Cannot get Computer information.");
 
+            var message = "Invalid Information.";
             if (computer.IsConnected && computer.IsOnline && computer.IsReserved)
             {
-                var message = $@"
+                message = $@"
 Dear Student,
 
 Please run your SSH client and connect to 
@@ -49,26 +51,23 @@ Password:
 Regards,
 Azure Hybrid Cloud Lab Environment 
 ";
-                return new OkObjectResult(message);
             }
             else
             {
-                var message = $@"
+                message = $@"
 Dear Student,
 
 Please wait for 30 seconds and refresh this page again! 
 Computer Connected to SSH server:       {computer.IsConnected}
 Computer Online:                        {computer.IsOnline}
 Computer reservation:                   {computer.IsReserved}
+Creation Time:                          {sshConnection.Timestamp!.Value.ToString("dddd, dd MMMM yyyy HH:mm:ss")}
 
 Regards,
 Azure Hybrid Cloud Lab Environment 
 ";
-
             }
-
-
-            return new OkObjectResult("Invalid Information.");
+            return new OkObjectResult(message);
         }
     }
 }

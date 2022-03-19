@@ -33,13 +33,13 @@ public static class GetDeviceConnectionStringFunction
             IpAddress = req.Query["IpAddress"],
             MachineName = req.Query["MachineName"],
             DeviceId = req.Query["DeviceId"],
-            MacAddress = req.Query["ComputerId"],
+            MacAddress = req.Query["MacAddress"],
             IsConnected = false,
             IsOnline = false,
             IsReserved = false,
             LastErrorMessage = req.Query["LastErrorMessage"],
             PartitionKey = req.Query["Location"],
-            RowKey = req.Query["ComputerId"]
+            RowKey = req.Query["MacAddress"]
         };
 
         var registryManager =

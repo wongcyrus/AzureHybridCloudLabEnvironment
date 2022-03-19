@@ -59,12 +59,12 @@ public class AllocatePcFunction
             {
                 sshConnection.Status = "ASSIGNED";
                 sshConnection.ETag = ETag.All;
-                sshConnection.ComputerId = computer.RowKey;
+                sshConnection.MacAddress = computer.MacAddress;
                 sshConnectionDao.Upsert(sshConnection);
                 var email = new Email(config, log);
                 var appName = Environment.ExpandEnvironmentVariables("%WEBSITE_SITE_NAME%");
                 var queryString = HttpUtility.ParseQueryString(string.Empty);
-                queryString.Add("Lab", sshConnection.Lab);
+                queryString.Add("Location", sshConnection.Location);
                 queryString.Add("Email", sshConnection.Email);
                 queryString.Add("Token", sshConnection.Password.Substring(0,10));
                 var connectionToPcUrl = $"https://{appName}.azurewebsites.net/api/ConnectToPcFunction?" + queryString;
@@ -109,7 +109,7 @@ Azure Hybrid Cloud Lab Environment
 
         sshConnection.Status = "NO_PC_AVAILABLE";
         sshConnection.ETag = ETag.All;
-        sshConnection.ComputerId = "";
+        sshConnection.MacAddress = "";
         sshConnectionDao.Upsert(sshConnection);
         var email = new Email(config, log);
         var emailMessage = new EmailMessage
