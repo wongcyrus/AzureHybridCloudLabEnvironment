@@ -74,6 +74,7 @@ public sealed class WindowsBackgroundService : BackgroundService
             var connectionInfo = new ConnectionInfo(_session.IpAddress, _session.Port,
                 _session.Username, new PasswordAuthenticationMethod(_session.Username, _session.Password));
             _sshClient = new SshClient(connectionInfo);
+            _sshClient.KeepAliveInterval = TimeSpan.FromSeconds(10);
             _sshClient.ErrorOccurred += (s, args) => _logger.LogInformation("sshClient:" + args.Exception.Message);
             _sshClient.Connect();
 
@@ -95,11 +96,9 @@ public sealed class WindowsBackgroundService : BackgroundService
                 _sshClient.AddForwardedPort(port);
                 port.Start();
                 _forwardedPorts.Add(port);
-
+                Task.Delay(1000).Wait();
                 _logger.LogInformation("ForwardedPortRemote IsStarted=" + port.IsStarted);
             }
-
-            Task.Delay(5000).Wait();
             var allPortsForwardingStarted = _forwardedPorts.All(c => c.IsStarted);
             await _sessionService.UpdateConnectionStatus(_sshClient.IsConnected && allPortsForwardingStarted);
         }
