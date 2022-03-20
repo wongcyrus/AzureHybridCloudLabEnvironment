@@ -40,24 +40,24 @@ public static class ConnectToPcFunction
 Dear Student, <br/>
 <br/>
 Please run your SSH client and connect to <br/>
-IP:&nbsp&nbsp&nbsp&nbsp{sshConnection.IpAddress} <br/>
+IP:&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp{sshConnection.IpAddress} <br/>
 Port:&nbsp&nbsp&nbsp&nbsp{sshConnection.Port} <br/>
 User:&nbsp&nbsp&nbsp&nbsp{sshConnection.Username} <br/>
-Password: <br/>{sshConnection.Password}<br/> 
+Password: <br/><b>{sshConnection.Password}</b><br/> 
 <br/> 
 Please refresh this page to get the latest PC status.<br/> 
 <br/> 
 If you are using Windows and installed <a href=""https://www.bitvise.com/ssh-client-download"">Bitwise SSH client</a>, run this command in search.<br/> 
 <br/> 
-BvSsh -host={sshConnection.IpAddress} -port={sshConnection.Port} -user={sshConnection.Username} -password=""{sshConnection.Password}"" -openRDP=y -loginOnStartup
+<b>BvSsh -host={sshConnection.IpAddress} -port={sshConnection.Port} -user={sshConnection.Username} -password=""{sshConnection.Password}"" -openRDP=y -loginOnStartup</b>
+<br/><br/> 
+If you are using Mac OS or Linux,run this command in terminal.<br/>
 <br/> 
-<br/> 
-If you are using Mac OS or Linux,run this command in terminal<br/> 
-<br/> 
-ssh {sshConnection.Username}@{sshConnection.IpAddress} -p{sshConnection.Port} -L 3389:0.0.0.0:3389 -L 5900:0.0.0.0:5900
-<br/> 
+<b>ssh {sshConnection.Username}@{sshConnection.IpAddress} -p{sshConnection.Port} -L 3389:0.0.0.0:3389 -L 5900:0.0.0.0:5900</b>
+<br/><br/> 
 Enter the SSH server password, open Remote Desktop client and connect to localhost.
 <br/> 
+<br/>
 Regards,<br/> 
 Azure Hybrid Cloud Lab Environment <br/> 
 </p>
