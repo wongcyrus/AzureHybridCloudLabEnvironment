@@ -75,9 +75,9 @@ Azure Hybrid Cloud Lab Environment <br/>
 Dear Student,<br/> 
 <br/> 
 Please wait for 30 seconds and refresh this page again, if your lab class is ongoing. <br/> 
-Is Computer:&nbsp&nbsp&nbsp&nbsp    {computer.IsConnected}<br/> 
-Is Online:&nbsp&nbsp&nbsp&nbsp      {computer.IsOnline}<br/> 
-Is Reserved:&nbsp&nbsp&nbsp&nbsp    {computer.IsReserved}<br/> 
+Is Connected:&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp    {computer.IsConnected}<br/> 
+Is Online:&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp      {computer.IsOnline}<br/> 
+Is Reserved:&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp    {computer.IsReserved}<br/> 
 Creation Time:&nbsp&nbsp&nbsp&nbsp  {sshConnection.Timestamp!.Value.ToString("dddd, dd MMMM yyyy HH:mm:ss")}<br/> 
 </p>
 <p>
