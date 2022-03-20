@@ -37,7 +37,7 @@ public static class ConnectToPcFunction
         if (computer.IsConnected && computer.IsOnline && computer.IsReserved)
             message = $@"
 <p>
-Dear Student, <br/>
+Dear Student,<br/>
 <br/>
 Please run your SSH client and connect to <br/>
 IP:&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp{sshConnection.IpAddress} <br/>
@@ -72,13 +72,22 @@ Azure Hybrid Cloud Lab Environment <br/>
         else
             message = $@"
 <p>
-Dear Student<br/> 
+Dear Student,<br/> 
 <br/> 
-Please wait for 30 seconds and refresh this page again, if your lab class still is ongoing. <br/> 
-Computer Connected to SSH server:&nbsp&nbsp&nbsp&nbsp    {computer.IsConnected}<br/> 
-Computer is Online:&nbsp&nbsp&nbsp&nbsp                  {computer.IsOnline}<br/> 
-Computer is reserved for you:&nbsp&nbsp&nbsp&nbsp        {computer.IsReserved}<br/> 
-Creation Time:&nbsp&nbsp&nbsp&nbsp                       {sshConnection.Timestamp!.Value.ToString("dddd, dd MMMM yyyy HH:mm:ss")}<br/> 
+Please wait for 30 seconds and refresh this page again, if your lab class is ongoing. <br/> 
+Is Computer:&nbsp&nbsp&nbsp&nbsp    {computer.IsConnected}<br/> 
+Is Online:&nbsp&nbsp&nbsp&nbsp      {computer.IsOnline}<br/> 
+Is Reserved:&nbsp&nbsp&nbsp&nbsp    {computer.IsReserved}<br/> 
+Creation Time:&nbsp&nbsp&nbsp&nbsp  {sshConnection.Timestamp!.Value.ToString("dddd, dd MMMM yyyy HH:mm:ss")}<br/> 
+</p>
+<p>
+In order to remote into your reserved Lab PC, you need to wait until all 3 conditions become True.
+</p>
+<p>
+<img src=""https://github.com/wongcyrus/AzureHybridCloudLabEnvironment/raw/main/images/SimplifiedLogic.png"" />
+</p>
+<p>
+<br/> 
 <br/> 
 Regards,<br/> 
 Azure Hybrid Cloud Lab Environment <br/> 
