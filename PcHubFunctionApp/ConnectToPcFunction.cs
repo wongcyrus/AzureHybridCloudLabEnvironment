@@ -33,44 +33,69 @@ public static class ConnectToPcFunction
         if (computer == null) return new OkObjectResult("Cannot get Computer information.");
 
         string message;
+        
         if (computer.IsConnected && computer.IsOnline && computer.IsReserved)
             message = $@"
-Dear Student,
-
-Please run your SSH client and connect to 
-IP:             {sshConnection.IpAddress}
-Port:           {sshConnection.Port}
-User:           {sshConnection.Username}
-Password:       {sshConnection.Password}
-
-Please refresh this page to get the latest PC status.
-
-If you are using Windows and Bitwise SSH client, you can run this command.
-
+<p>
+Dear Student, <br/>
+<br/>
+Please run your SSH client and connect to <br/>
+IP:&nbsp&nbsp&nbsp&nbsp{sshConnection.IpAddress} <br/>
+Port:&nbsp&nbsp&nbsp&nbsp{sshConnection.Port} <br/>
+User:&nbsp&nbsp&nbsp&nbsp{sshConnection.Username} <br/>
+Password: <br/>{sshConnection.Password}<br/> 
+<br/> 
+Please refresh this page to get the latest PC status.<br/> 
+<br/> 
+If you are using Windows and installed <a href=""https://www.bitvise.com/ssh-client-download"">Bitwise SSH client</a>, run this command in search.<br/> 
+<br/> 
 BvSsh -host={sshConnection.IpAddress} -port={sshConnection.Port} -user={sshConnection.Username} -password=""{sshConnection.Password}"" -openRDP=y -loginOnStartup
-
-If you are using Mac or Linux, you can run this command.
-
+<br/> 
+<br/> 
+If you are using Mac OS or Linux,run this command in terminal<br/> 
+<br/> 
 ssh {sshConnection.Username}@{sshConnection.IpAddress} -p{sshConnection.Port} -L 3389:0.0.0.0:3389 -L 5900:0.0.0.0:5900
-
+<br/> 
 Enter the SSH server password, open Remote Desktop client and connect to localhost.
+<br/> 
+Regards,<br/> 
+Azure Hybrid Cloud Lab Environment <br/> 
+</p>
+<br/>
+<h3>Remote with Bitwise SSH Client from Windows Demo</h3>
+<img src=""https://github.com/wongcyrus/AzureHybridCloudLabEnvironment/raw/main/images/BitviseLoginDemo.gif"" />
+<br/>
+<h3>Remote with SSH command line from MacOS Demo</h3>
+<img src=""https://github.com/wongcyrus/AzureHybridCloudLabEnvironment/raw/main/images/MacLoginDemo.gif"" />
 
-Regards,
-Azure Hybrid Cloud Lab Environment 
 ";
         else
             message = $@"
-Dear Student,
-
-Please wait for 30 seconds and refresh this page again! 
-Computer Connected to SSH server:       {computer.IsConnected}
-Computer is Online:                     {computer.IsOnline}
-Computer is reserved for you:           {computer.IsReserved}
-Creation Time:                          {sshConnection.Timestamp!.Value.ToString("dddd, dd MMMM yyyy HH:mm:ss")}
-
-Regards,
-Azure Hybrid Cloud Lab Environment 
+<p>
+Dear Student<br/> 
+<br/> 
+Please wait for 30 seconds and refresh this page again, if your lab class still is ongoing. <br/> 
+Computer Connected to SSH server:&nbsp&nbsp&nbsp&nbsp    {computer.IsConnected}<br/> 
+Computer is Online:&nbsp&nbsp&nbsp&nbsp                  {computer.IsOnline}<br/> 
+Computer is reserved for you:&nbsp&nbsp&nbsp&nbsp        {computer.IsReserved}<br/> 
+Creation Time:&nbsp&nbsp&nbsp&nbsp                       {sshConnection.Timestamp!.Value.ToString("dddd, dd MMMM yyyy HH:mm:ss")}<br/> 
+<br/> 
+Regards,<br/> 
+Azure Hybrid Cloud Lab Environment <br/> 
+</p>
 ";
-        return new OkObjectResult(message);
+        var html = $@"
+<html>
+    <head>
+        <title>Azure Hybrid Cloud Lab Environment</title>
+    </head>
+    <body>
+{message}
+    </body>
+</html>
+
+";
+        return new ContentResult { Content = html, ContentType = "text/html" };
+      
     }
 }
