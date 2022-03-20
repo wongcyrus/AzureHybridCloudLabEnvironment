@@ -41,11 +41,19 @@ Please run your SSH client and connect to
 IP:             {sshConnection.IpAddress}
 Port:           {sshConnection.Port}
 User:           {sshConnection.Username}
-Password:
-
-{sshConnection.Password}
+Password:       {sshConnection.Password}
 
 Please refresh this page to get the latest PC status.
+
+If you are using Windows and Bitwise SSH client, you can run this command.
+
+BvSsh -host={sshConnection.IpAddress} -port={sshConnection.Port} -user={sshConnection.Username} -password=""{sshConnection.Password}"" -openRDP=y -loginOnStartup
+
+If you are using Mac or Linux, you can run this command.
+
+ssh {sshConnection.Username}@{sshConnection.IpAddress} -p{sshConnection.Port} -L 3389:0.0.0.0:3389 -L 5900:0.0.0.0:5900
+
+Enter the SSH server password, open Remote Desktop client and connect to localhost.
 
 Regards,
 Azure Hybrid Cloud Lab Environment 
