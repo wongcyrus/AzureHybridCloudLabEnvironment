@@ -1,0 +1,15 @@
+- name: Install IoTSshClientService
+  hosts: windows
+  gather_facts: no
+  tasks:
+    - name: Restart IoTSshClientService
+      win_service:
+        name: IoTSshClientService      
+        state: restarted
+    - name: Check IoTSshClientService is installed
+      win_service:
+        name: IoTSshClientService
+      register: service_info
+    - debug: msg="{{ inventory_hostname }} => {{ service_info.state }}"
+               
+ 
