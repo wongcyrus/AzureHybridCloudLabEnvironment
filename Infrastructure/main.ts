@@ -2,8 +2,8 @@ import { Construct } from "constructs";
 import { App, TerraformOutput, TerraformStack } from "cdktf";
 import { AzurermProvider, ResourceGroup, StorageAccount, StorageQueue, StorageTable } from "azure-common-construct/.gen/providers/azurerm";
 import { StringResource } from 'azure-common-construct/.gen/providers/random'
-// import { DataExternal } from "azure-common-construct/.gen/providers/external";
-import { AzureFunctionLinuxConstruct } from "azure-common-construct/patterns/AzureFunctionLinuxConstruct";
+import { DataExternal } from "azure-common-construct/.gen/providers/external";
+import { AzureFunctionLinuxConstruct, PublishMode } from "azure-common-construct/patterns/AzureFunctionLinuxConstruct";
 import { AzureIotEventHubConstruct } from "azure-common-construct/patterns/AzureIotEventHubConstruct";
 import { AzureStaticConstainerConstruct } from "azure-common-construct/patterns/AzureStaticConstainerConstruct";
 
@@ -89,36 +89,37 @@ class AzureHybridCloudLabEnvironmentStack extends TerraformStack {
       prefix,
       resourceGroup,
       appSettings,
-      vsProjectPath: path.join(__dirname, "../", "PcHubFunctionApp")
+      vsProjectPath: path.join(__dirname, "../", "PcHubFunctionApp"),
+      publishMode: PublishMode.AfterCodeChange
     })
 
-    // const psScriptPath = path.join(__dirname, "GetFunctionKey.ps1");
-    // const getDeviceConnectionStringFunctionKeyExternal = new DataExternal(this, "GetDeviceConnectionStringFunctionKeyExternal", {
-    //   program: ["PowerShell", psScriptPath],
-    //   query: {
-    //     resourceGroup: resourceGroup.name,
-    //     functionAppName: azureFunctionConstruct.functionApp.name,
-    //     functionName: "GetDeviceConnectionStringFunction"
-    //   }
-    // })
-    // const getDeviceConnectionStringFunctionKey = getDeviceConnectionStringFunctionKeyExternal.result.lookup("default")
+    const psScriptPath = path.join(__dirname, "GetFunctionKey.ps1");
+    const getDeviceConnectionStringFunctionKeyExternal = new DataExternal(this, "GetDeviceConnectionStringFunctionKeyExternal", {
+      program: ["PowerShell", psScriptPath],
+      query: {
+        resourceGroup: resourceGroup.name,
+        functionAppName: azureFunctionConstruct.functionApp.name,
+        functionName: "GetDeviceConnectionStringFunction"
+      }
+    })
+    const getDeviceConnectionStringFunctionKey = getDeviceConnectionStringFunctionKeyExternal.result.lookup("FunctionKey")
 
-    // const addSshConnectionFunctionKeyExternal = new DataExternal(this, "AddSshConnectionFunctionKeyExternal", {
-    //   program: ["PowerShell", psScriptPath],
-    //   query: {
-    //     resourceGroup: resourceGroup.name,
-    //     functionAppName: azureFunctionConstruct.functionApp.name,
-    //     functionName: "GetDeviceConnectionStringFunction"
-    //   }
-    // })
-    // const addSshConnectionFunctionKey = addSshConnectionFunctionKeyExternal.result.lookup("default")
+    const addSshConnectionFunctionKeyExternal = new DataExternal(this, "AddSshConnectionFunctionKeyExternal", {
+      program: ["PowerShell", psScriptPath],
+      query: {
+        resourceGroup: resourceGroup.name,
+        functionAppName: azureFunctionConstruct.functionApp.name,
+        functionName: "GetDeviceConnectionStringFunction"
+      }
+    })
+    const addSshConnectionFunctionKey = addSshConnectionFunctionKeyExternal.result.lookup("FunctionKey")
 
-    // new TerraformOutput(this, "GetDeviceConnectionStringFunctionKey", {
-    //   value: getDeviceConnectionStringFunctionKey
-    // });
-    // new TerraformOutput(this, "AddSshConnectionFunctionKey", {
-    //   value: addSshConnectionFunctionKey
-    // });
+    new TerraformOutput(this, "GetDeviceConnectionStringFunctionKey", {
+      value: getDeviceConnectionStringFunctionKey
+    });
+    new TerraformOutput(this, "AddSshConnectionFunctionKey", {
+      value: addSshConnectionFunctionKey
+    });
 
     new TerraformOutput(this, "FunctionAppHostname", {
       value: azureFunctionConstruct.functionApp.name
