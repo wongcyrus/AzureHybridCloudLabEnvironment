@@ -1,8 +1,8 @@
 import { Construct } from "constructs";
 import { App, TerraformOutput, TerraformStack } from "cdktf";
-import { AzurermProvider, ResourceGroup, StorageAccount, StorageQueue, StorageTable } from "azure-common-construct/.gen/providers/azurerm";
-import { StringResource } from 'azure-common-construct/.gen/providers/random'
-import { DataExternal } from "azure-common-construct/.gen/providers/external";
+import { AzurermProvider, ResourceGroup, StorageAccount, StorageQueue, StorageTable } from "cdktf-azure-providers/.gen/providers/azurerm";
+import { StringResource } from 'cdktf-azure-providers/.gen/providers/random'
+import { DataExternal } from "cdktf-azure-providers/.gen/providers/external";
 import { AzureFunctionLinuxConstruct, PublishMode } from "azure-common-construct/patterns/AzureFunctionLinuxConstruct";
 import { AzureIotEventHubConstruct } from "azure-common-construct/patterns/AzureIotEventHubConstruct";
 import { AzureStaticConstainerConstruct } from "azure-common-construct/patterns/AzureStaticConstainerConstruct";
@@ -81,7 +81,8 @@ class AzureHybridCloudLabEnvironmentStack extends TerraformStack {
       "AdminEmail": process.env.ADMIN_EMAIL!,
       "Salt": prefix,
       "StorageAccountName": storageAccount.name,
-      "StorageAccountKey": storageAccount.primaryAccessKey
+      "StorageAccountKey": storageAccount.primaryAccessKey,
+      "StorageAccountConnectionString": storageAccount.primaryConnectionString
     }
 
     const azureFunctionConstruct = new AzureFunctionLinuxConstruct(this, "AzureFunctionConstruct", {
@@ -89,7 +90,7 @@ class AzureHybridCloudLabEnvironmentStack extends TerraformStack {
       prefix,
       resourceGroup,
       appSettings,
-      vsProjectPath: path.join(__dirname, "../", "PcHubFunctionApp"),
+      vsProjectPath: path.join(__dirname, "..", "PcHubFunctionApp/"),
       publishMode: PublishMode.AfterCodeChange
     })
 
@@ -109,7 +110,7 @@ class AzureHybridCloudLabEnvironmentStack extends TerraformStack {
       query: {
         resourceGroup: resourceGroup.name,
         functionAppName: azureFunctionConstruct.functionApp.name,
-        functionName: "GetDeviceConnectionStringFunction"
+        functionName: "AddSshConnectionFunction"
       }
     })
     const addSshConnectionFunctionKey = addSshConnectionFunctionKeyExternal.result.lookup("FunctionKey")
@@ -123,6 +124,15 @@ class AzureHybridCloudLabEnvironmentStack extends TerraformStack {
 
     new TerraformOutput(this, "FunctionAppHostname", {
       value: azureFunctionConstruct.functionApp.name
+    });
+
+    
+    new TerraformOutput(this, "AzureFunctionBaseUrl", {
+      value: `https://${azureFunctionConstruct.functionApp.name}.azurewebsites.net`
+    });
+
+    new TerraformOutput(this, "LifeCycleHookUrl", {
+      value: `https://${ azureFunctionConstruct.functionApp.name}.azurewebsites.net/api/AddSshConnectionFunction?code=${addSshConnectionFunctionKey}`
     });
 
     new TerraformOutput(this, "Environment", {

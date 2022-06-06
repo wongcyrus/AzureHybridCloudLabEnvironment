@@ -5,10 +5,9 @@ using Microsoft.Extensions.Configuration;
 namespace PcHubFunctionApp.Helper;
 
 public class Config
-{
+{ 
     public enum Key
-    {
-        AzureWebJobsStorage,
+    {       
         EmailSmtp,
         EmailUserName,
         EmailPassword,
@@ -24,6 +23,7 @@ public class Config
         Environment,
         StorageAccountName,
         StorageAccountKey,
+        StorageAccountConnectionString,
         Salt
     }
 
