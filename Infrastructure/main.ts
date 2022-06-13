@@ -16,10 +16,14 @@ class AzureHybridCloudLabEnvironmentStack extends TerraformStack {
     super(scope, name);
 
     new AzurermProvider(this, "AzureRm", {
-      features: {}
+      features: {
+        resourceGroup: {
+          preventDeletionIfContainsResources: false
+        }
+      }
     })
 
-    const prefix = "AzureHybridCloudLab"
+    const prefix = "AzureHybridLab"
     const environment = "dev"
 
     const resourceGroup = new ResourceGroup(this, "ResourceGroup", {
@@ -86,12 +90,13 @@ class AzureHybridCloudLabEnvironmentStack extends TerraformStack {
     }
 
     const azureFunctionConstruct = new AzureFunctionLinuxConstruct(this, "AzureFunctionConstruct", {
+      functionAppName: `ive-lab`,
       environment,
       prefix,
       resourceGroup,
       appSettings,
       vsProjectPath: path.join(__dirname, "..", "PcHubFunctionApp/"),
-      publishMode: PublishMode.AfterCodeChange
+      publishMode: PublishMode.Always
     })
 
     const psScriptPath = path.join(__dirname, "GetFunctionKey.ps1");
@@ -101,7 +106,8 @@ class AzureHybridCloudLabEnvironmentStack extends TerraformStack {
         resourceGroup: resourceGroup.name,
         functionAppName: azureFunctionConstruct.functionApp.name,
         functionName: "GetDeviceConnectionStringFunction"
-      }
+      },
+      dependsOn: [azureFunctionConstruct.functionApp]
     })
     const getDeviceConnectionStringFunctionKey = getDeviceConnectionStringFunctionKeyExternal.result.lookup("FunctionKey")
 
@@ -111,7 +117,8 @@ class AzureHybridCloudLabEnvironmentStack extends TerraformStack {
         resourceGroup: resourceGroup.name,
         functionAppName: azureFunctionConstruct.functionApp.name,
         functionName: "AddSshConnectionFunction"
-      }
+      },
+      dependsOn: [azureFunctionConstruct.functionApp]
     })
     const addSshConnectionFunctionKey = addSshConnectionFunctionKeyExternal.result.lookup("FunctionKey")
 
@@ -126,13 +133,13 @@ class AzureHybridCloudLabEnvironmentStack extends TerraformStack {
       value: azureFunctionConstruct.functionApp.name
     });
 
-    
+
     new TerraformOutput(this, "AzureFunctionBaseUrl", {
       value: `https://${azureFunctionConstruct.functionApp.name}.azurewebsites.net`
     });
 
     new TerraformOutput(this, "LifeCycleHookUrl", {
-      value: `https://${ azureFunctionConstruct.functionApp.name}.azurewebsites.net/api/AddSshConnectionFunction?code=${addSshConnectionFunctionKey}`
+      value: `https://${azureFunctionConstruct.functionApp.name}.azurewebsites.net/api/AddSshConnectionFunction?code=${addSshConnectionFunctionKey}`
     });
 
     new TerraformOutput(this, "Environment", {
