@@ -70,6 +70,7 @@ class AzureHybridCloudLabEnvironmentStack extends TerraformStack {
       storageAccountName: storageAccount.name
     })
 
+
     const appSettings = {
       "IotHubPrimaryConnectionString": azureIotConstruct.iothubPrimaryConnectionString,
       "EventHubPrimaryConnectionString": azureIotConstruct.eventhubPrimaryConnectionString,
@@ -78,6 +79,7 @@ class AzureHybridCloudLabEnvironmentStack extends TerraformStack {
       "BastionArcAdminUsername": azureStaticConstainerConstruct.containerRegistry.adminUsername,
       "BastionArcAdminPassword": azureStaticConstainerConstruct.containerRegistry.adminPassword,
       "BastionArcLoginServer": azureStaticConstainerConstruct.containerRegistry.loginServer,
+      "CommunicationServiceConnectionString":process.env.COMMUNICATION_SERVICE_CONNECTION_STRING!,
       "EmailSmtp": process.env.EMAIL_SMTP!,
       "EmailUserName": process.env.EMAIL_USERNAME!,
       "EmailPassword": process.env.EMAIL_PASSWORD!,

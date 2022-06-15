@@ -7,7 +7,8 @@ namespace PcHubFunctionApp.Helper;
 public class Config
 { 
     public enum Key
-    {       
+    {
+        CommunicationServiceConnectionString,
         EmailSmtp,
         EmailUserName,
         EmailPassword,
