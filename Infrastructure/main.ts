@@ -2,9 +2,10 @@ import { Construct } from "constructs";
 import { App, TerraformOutput, TerraformStack } from "cdktf";
 import { AzurermProvider, ResourceGroup, StorageAccount, StorageQueue, StorageTable } from "cdktf-azure-providers/.gen/providers/azurerm";
 import { StringResource } from 'cdktf-azure-providers/.gen/providers/random'
-import { AzureFunctionLinuxConstruct, PublishMode } from "azure-common-construct/patterns/AzureFunctionLinuxConstruct";
+import { AzureFunctionLinuxConstruct } from "azure-common-construct/patterns/AzureFunctionLinuxConstruct";
 import { AzureIotEventHubConstruct } from "azure-common-construct/patterns/AzureIotEventHubConstruct";
 import { AzureStaticConstainerConstruct } from "azure-common-construct/patterns/AzureStaticConstainerConstruct";
+import { PublishMode } from "azure-common-construct/patterns/PublisherConstruct";
 
 import * as path from "path";
 import * as dotenv from 'dotenv';
